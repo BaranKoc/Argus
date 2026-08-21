@@ -1,0 +1,63 @@
+Bu bölümleri çok uzatmayayım, nasıl olsa ikimizin kurulumu da aynı.
+Sistem olarak yine Kayıt Küprüsü kullanıyoruz.
+Kayıt Küprüsü var yani, parça parça çalışıyor.
+Şu anda sesi alıyor, arka tarafta da eş zamanlı olarak yazıya çevirmeye başlıyor.
+Kayıtlar burada hazır duruyor. Bir bakayım.
+-Konuştuğumuz yeri işaretliyor mu?
+Evet, tam onu göstereceğim.
+Benim taraftaki fark şu: konuşulanları ayrıca sınıflandırıyor.
+Sınıflandırıyor, konuşulanları.
+Mesela önerileri ayırıyor, aksiyonları ayırıyor, değerleri ayırıyor.
+Bir de şöyle bir düzenleme ekledim.
+Şu an kayıt sürüyor.
+-Şu an kayıttayız.
+-Şu an kayıttayız.
+-Şu an kayıttayız.
+-Aa, öyle bir şey mi.
+-Ben itiraz etsem?
+-Hangi yazarı daha çok seviyorsunuz?
+-Hangi yazarı daha çok seviyorsunuz?
+-Mesela bu tarz şeyleri yanlışlıkla karar olarak almıyor.
+-Evrakı postaya verdik.
+-Çevre camı sektörü.
+-Hahaha.
+-Ben tam emin olamadım.
+-Buradan emin olmak gerekiyor, şöyle bir düzenleme olayı ekledim.
+Yani mikrofonla ilgili bir sorun yaşandıysa, o bizim çözemeyeceğimiz bir şey; buradan elle düzeltebiliyorsun.
+Diyelim ki bir yeri düzelttiniz, ya da yeni satır eklediniz.
+Benim sorum şu olacak mesela.
+Bazen müşteriyle görüşmeyi internetten yapıyoruz ya.
+Bir de yabancı dil desteği konuşuyorduk ya, üstüne veren.
+Ondan bağlantıları yapabilir miyiz?
+-Şu anda teknik olarak...
+-O yüzden dışarıdan bağlanacağı için.
+Hı.
+Siz toplantı programını bağlamak mı istiyorsunuz?
+Bağlamaya gerek yok aslında.
+Bu bilgisayar telefona bağlı değil mi zaten?
+-Değil, ayrı duruyor.
+-Tamam o zaman sorun yok.
+Şimdi şuraya bakalım, burada üç kanaş görünüyor.
+-Üç kanaş mı dedin?
+-Üç kanal olacaktı, evet.
+Mikrofon sesi, sistem sesi, bir de uzaktan katılanların sesi.
+Şu an sadece ikisini alıyoruz.
+-Sanırım herkes öyle çalışıyor ya.
+-Evet.
+-Sıkıntılar.
+-Adam ikisini birden alıyor.
+-Adam ikisini birden alıyor.
+-O zaman mikrofon sesini de sisteme katalım.
+O zaman mikrofon sesini sistem sesine çevireceğiz.
+Sinya. Ha, iki sinya olacak.
+Bir de şurada dışarı aktarma özelliğimiz var.
+Resim ve düz metin çıktısını kaldırabilirim, kaldırabilirim onları.
+Onlar çok güzel görünmüyor ama PDF güzel bir çıktı veriyor.
+Çıktı formatı olarak PDF kalsın yani.
+Düz metni bu arada çok kullanıyoruz.
+Doğrudan siteye.
+Doğrudan web sitesine konulur diye eklemiştim onu.
+Bu da geliyor.
+Sesimizi şu an algılıyor demiştim.
+Evet hâlâ devam ediyor.
+Bitireyim o zaman kaydı.

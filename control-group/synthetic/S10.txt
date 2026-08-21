@@ -1,0 +1,400 @@
+Tekrar bu sayfaya dönüyor.
+Yani şu an kimseye bildirim gitmemiş mi?
+Kimseye gitmemiş.
+Peki bunu deneme şansınız var mı?
+Tekrar göndereyim.
+Şurada bir yerde yapsak ya böyle bir şey.
+Bir bakalım mı?
+Tamam.
+Şuraya taşmışlar bir dakika.
+Şurada yumuşak basınca bir şey oluyor.
+-Yapıştırılmış bir şey var.
+-Adına zimmetli bir araç diyor.
+-Zimmetli bir araç diyor.
+-Açın buradan diyor.
+-Şimdi buradan bak bakalım.
+Tamam, bak bakalım kullanıcılar.
+Kilometreyle direkt portföye yönlendiriyor sizi.
+Kilometre girmeniz gerekiyor.
+Yağ varsa kilometreyi giriyorsunuz.
+Kilometre gözükmezse eğer şurası aktif hale geliyor.
+Aktif hale geldikten sonra kilometreyi girdikten sonra gönderiyorsunuz.
+Eğer ki buradan gelmezse şurada aşağıda oluşturulmuş olan görevler var.
+Bu görevlerin içinde de alt görevler var.
+Ama hiç kimse bir de buraya bakmıyor.
+Öncelikle bunu her ay yapacağınız için otomatik hale getirmemiz gerekiyor.
+Her ayın birinde çalışsın.
+Belli bir saate kadar.
+Girilmezse de her gün hatırlatıyor olması lazım.
+Peki, siz buradan bir şeye bakmanız gerekiyor mu?
+Arda, bu konuda birlikte bizim...
+Bununla birlikte bizim şu an yapmış olduğumuz sistemdekiyle aynı paralelde gidiyor olması lazım.
+O da şu, örnek veriyorum, bana babamın aracı zimmetli.
+Örnek veriyorum, bana babamın aracı zimmetli ya.
+Her ay sistem otomatik olarak gönderiyor bana bütün her şeyi.
+Kilometreyi ben orada, bana sistem otomatik gönderdiğini ben elle giriyorum.
+Ararım, pilot uygulamasını açarım.
+-Yani şu an manuel mi giriyorsunuz?
+-Manuel giriyorum, evet.
+-Bu tam da otomatikleşmesi gereken yer.
+Bakın burada bir tablo var, araç listesi.
+Plaka, marka, model, son kilometre, son güncelleme tarihi.
+Son güncelleme tarihi kırmızıysa otuz günü geçmiş demektir.
+Otuz günü geçenler için otomatik hatırlatma çıkacak.
+-Otuz gün mü, kırk beş gün mü?
+-Otuz gün konuşmuştuk.
+-Tamam otuz kalsın.
+Peki bu listeyi kim güncelleyecek?
+Şu an idari işler güncelliyor.
+İdari işler güncelliyor ama gecikmeli oluyor.
+Gecikmeli oluyor çünkü herkes tek tek mail atıyor.
+Mail yerine forma bağlasak?
+Forma bağlarsak kayıt altına da alınmış olur.
+Kayıt altına alınması önemli, denetimde soruyorlar.
+-Denetim demişken, geçen seneki bulgular kapandı mı?
+-Üç tanesi kapandı, iki tanesi açık.
+Açık olanlar hangileri?
+Biri yakıt fişlerinin taranması, diğeri servis kayıtlarının eksikliği.
+Servis kayıtları zaten bu modüle girecek.
+Bu modüle girerse bulgu da kapanmış olur.
+Onu da yazalım o zaman.
+Şimdi şuraya geçelim, bildirim ayarları.
+Burada üç tip bildirim var.
+Bilgilendirme, uyarı ve kritik.
+Kritik olanlar hem uygulama içine hem de mesaj olarak gidiyor.
+-Mesaj derken kısa mesaj mı?
+-Kısa mesaj, evet. Ama onun bir maliyeti var.
+Maliyeti ne kadar?
+Adet başına yaklaşık kırk kuruş.
+Ayda kaç adet gidiyor?
+Ortalama iki bin civarı.
+İki bin adet ayda sekiz yüz lira eder.
+Sekiz yüz lira çok değil aslında.
+Değil ama gereksiz gidenleri ayıklarsak yarıya iner.
+Gereksizden kastın ne?
+Aynı kişiye aynı gün içinde üç kez gitmesi mesela.
+Onu gruplayalım, günde bir özet gitsin.
+Günde bir özet mantıklı.
+Tamam, günlük özet olarak değiştiriyoruz.
+Peki kritik olanlar yine anında mı gitsin?
+Kritikler anında gitsin, onlar zaten az.
+[[LOOP:Anında gitsin.:17]]
+Pardon, kayıt takıldı galiba.
+Devam edelim.
+Şimdi kullanıcı yetkileri kısmına bakalım.
+Burada üç rol tanımladık.
+İzleyici, düzenleyici ve yönetici.
+İzleyici sadece görüyor, düzenleyici kayıt açabiliyor.
+Yönetici ise silme yetkisine de sahip.
+Silme yetkisi tehlikeli, kalıcı mı siliyor?
+Kalıcı silmiyor, arşive taşıyor.
+Arşive taşıması iyi, geri alınabiliyor mu?
+Geri alınabiliyor ama sadece yönetici geri alabiliyor.
+-Peki kim sildi bilgisi tutuluyor mu?
+-Tutuluyor, işlem kaydında görünüyor.
+İşlem kaydını gösterebilir misin?
+Şurada, tarih, kullanıcı, işlem tipi ve eski değer.
+Eski değer de tutuluyor demek.
+Evet, denetim için gerekliydi.
+Bu güzel olmuş.
+Şimdi raporlara geçelim.
+Rapor tarafında dört başlık var.
+Araç bazlı, kişi bazlı, dönem bazlı ve masraf bazlı.
+Masraf bazlı olan muhasebeye gidecek olan.
+Muhasebe hangi formatta istiyor?
+Tablo olarak istiyorlar, dosya halinde.
+Dışa aktarma var mı?
+Var, buradan alıyorsunuz.
+Bir de tarih aralığı seçilebiliyor.
+Tarih aralığı varsayılan olarak ne geliyor?
+Bu ay geliyor.
+Geçen ay daha mantıklı olmaz mı?
+Ay kapandıktan sonra bakılıyor genelde.
+Doğru, geçen ay yapalım varsayılanı.
+Not aldım.
+-Şu grafikler nereden geliyor?
+-Aynı veriden, sadece görselleştiriyoruz.
+Grafikler yazdırılınca bozuluyor mu?
+Bozulmuyor, ölçekleniyor.
+Test ettiniz mi yazdırmayı?
+Tam olarak test etmedik aslında.
+O zaman onu da listeye ekleyelim.
+Ekliyorum.
+Şimdi biraz da altyapıdan konuşalım.
+Buranın teknolojisi farklı, mimarisi farklı.
+Bizim yapacağımız yapı farklı, işlediğimiz mimari farklı.
+Burayı eski ekip zamanında yapmışlardı.
+Şu taraftan destek alıyoruz.
+Biz danışmanla bir konuşalım.
+Biz bunu da evet aynen konuşalım.
+Nerede ne yapacağız?
+Hani verilecek, izlenmeyecek bir başlıkla onu bir konuşalım.
+Aslında güzel proje.
+Keyifli olur.
+Çok şey, keyifli olur.
+Sizin boğazınıza kırıklık, bitireceksin bunu bir aya kadar dediğimiz bir nokta yok.
+Yani geldiği zaman ne kadar oldu?
+Bu senin gelişimin için.
+Sana faydalı bir şey.
+Yani böyle bir proje yapmış olacaksın, ya da başlamış olacaksın.
+-Peki teslim tarihi diye bir şey var mı gerçekten?
+-Kesin tarih yok ama üç aylık bir hedef koyalım.
+Üç ay yeterli mi sizce?
+Yeterli, çünkü çoğu ekran hazır.
+Hazır olmayan neresi?
+Masraf tarafı ve entegrasyon tarafı.
+Entegrasyon derken hangi sistemle?
+Muhasebe sistemiyle.
+Muhasebe sisteminin arayüzü var mı?
+Var ama belgesi eski.
+Belgesi eskiyse kim bilecek?
+Onların tarafında bir kişi var, ona soracağız.
+İsmini alalım o zaman.
+Alacağım, bugün içinde yazarım.
+[[LOOP:Bugün içinde yazarım.:19]]
+Yine takıldı galiba, tamam.
+Devam.
+Bir de şu var, veri taşıma işi.
+Eski sistemdeki kayıtlar gelecek mi?
+Gelmesi lazım, en azından son iki yıl.
+Son iki yıl kaç kayıt eder?
+Yaklaşık on bin kayıt.
+On bin kayıt taşınabilir.
+Taşınabilir ama temizlik gerekir.
+Temizlik derken, mükerrer kayıtlar mı?
+Mükerrerler ve boş alanlar.
+Boş alanları ne yapacağız?
+Boş bırakacağız, uydurmayacağız.
+Doğru, uydurmak en kötüsü.
+Bir de plaka formatı farklıymış eskisinde.
+Plaka formatını dönüştürmek lazım o zaman.
+Dönüştürme betiği yazarız.
+Yazarız da bir kere çalışacak, dikkatli olmak lazım.
+Yedek alarak çalıştırırız.
+Yedek şart, tamam.
+Peki bu taşımayı kim yapacak?
+Ben yapabilirim ama gözden geçiren biri olsun.
+Ben gözden geçiririm.
+Tamam anlaştık.
+Şimdi son bir konu kaldı.
+Eğitim tarafı.
+Kullanıcılara eğitim verecek miyiz?
+Vermemiz lazım, yoksa kimse kullanmaz.
+Kaç kişilik bir grup?
+Kırk kişi civarı.
+Kırk kişiyi tek seferde toplayamayız.
+İkiye böleriz, iki oturum yaparız.
+İki oturum, her biri ne kadar?
+Bir buçuk saat yeter.
+Bir buçuk saat yeter, evet.
+Kayıt alalım mı oturumlardan?
+Alalım, sonradan izlerler.
+Sonradan izleyecek olan çok olur zaten.
+Bir de kısa bir kılavuz hazırlasak?
+Kılavuz iyi olur, ekran görüntüleriyle.
+Ekran görüntüleri değişirse kılavuz eskir ama.
+Eskir, o yüzden kısa tutalım.
+Kısa tutalım, sadece ana akış.
+Tamam, ana akış yeter.
+Peki başka bir konu var mı?
+Benden bu kadar.
+Bende de yok.
+Bir dakika, kapatmadan önce iki başlık daha var aslında.
+Neydi onlar?
+Bütçe tarafı ve mobil erişim.
+Bütçeden başlayalım o zaman.
+Bu yılki kalemde ne kadar ayrılmış?
+Yazılım kalemine toplam yüz seksen bin ayrılmış.
+Yüz seksen binin ne kadarı harcandı?
+Şu ana kadar kırk iki bin harcandı.
+Kırk iki bin nereye gitti?
+Sunucu kirası, lisanslar ve bir de danışmanlık günleri.
+Danışmanlık kaç gün oldu?
+On iki gün oldu, günlüğü iki bin beş yüzden.
+On iki gün az gelmiş bana.
+Az ama zaten çoğu işi içeride yaptık.
+İçeride yapmak iyi, bilgi bizde kalıyor.
+Bilgi içeride kalsın diye zaten böyle kurguladık.
+Peki kalan bütçe yeter mi üç aya?
+Yeter, hatta artar.
+Artarsa ne yapacağız?
+Artarsa mobil tarafa aktarırız.
+Tamam mobile geçelim madem.
+Mobilde tam uygulama mı olacak, yoksa sadece görüntüleme mi?
+Başta sadece görüntüleme düşünmüştük.
+Sadece görüntüleme yetmez bence.
+Neden yetmez?
+Çünkü kilometre girişini sahada yapıyor adam.
+Sahada telefondan giriyor yani.
+Aynen, masaya dönünce unutuyor.
+O zaman giriş de olmalı mobilde.
+Giriş olursa doğrulama nasıl olacak?
+Doğrulama derken?
+Yani adam yanlış kilometre girerse.
+Bir üst sınır koyabiliriz.
+Üst sınır nasıl belirlenir?
+Önceki kilometreden küçük olamaz, bir de aylık makul artıştan büyük olamaz.
+Makul artış ne kadar?
+Beş bin kilometre diyelim aylık.
+Beş bin bazı araçlar için az kalır.
+Hangileri için az kalır?
+Uzun yol araçları için.
+O zaman araç tipine göre ayrı sınır koyalım.
+Araç tipi zaten tabloda var.
+Varsa kullanalım.
+Not aldım, tip bazlı sınır.
+Peki uyarı mı verecek, engelleyecek mi?
+Engellemesin, uyarsın ve onaya düşsün.
+Onaya kim bakacak?
+Filo sorumlusu bakar.
+Filo sorumlusu kim şu an?
+Şu an vekaleten idari işlerde.
+Vekaleten olması sıkıntı yaratır mı?
+Yaratır, çünkü kalıcı bir sahip lazım bu işe.
+Onu yönetime taşıyalım o zaman.
+Taşıyalım, ben not alıyorum.
+Mobilde çevrimdışı çalışacak mı peki?
+Çevrimdışı zor olur.
+Neden zor?
+Çünkü çakışma çözümü gerekiyor.
+Çakışma derken aynı kaydı iki kişi girerse mi?
+Aynı kişi iki cihazdan girerse de olur.
+Onu şimdilik kapsam dışı bırakalım.
+Bırakalım, ilk sürümde olmasın.
+İlk sürüm ne zaman çıkacak peki?
+Üç ay dedik ya, onun sonunda.
+Üç ayın sonunda herkese birden mi açacağız?
+Hayır, önce pilot yapalım.
+Pilot kaç kişiyle olur?
+Beş altı kişi yeter.
+Beş altı kişi hangi birimden?
+Karışık olsun, idari işler ve saha.
+Karışık olması iyi, farklı kullanım görürüz.
+Pilot ne kadar sürer?
+İki hafta yeter.
+İki hafta sonunda ne olacak?
+Geri bildirimleri toplarız, sonra genele açarız.
+Geri bildirimi nasıl toplayacağız?
+Kısa bir form, beş soru falan.
+Beş soru az değil mi?
+Az ama uzun formu kimse doldurmuyor.
+Doğru, kısa tutalım.
+Bir de birebir konuşalım pilot kullanıcılarla.
+Birebir konuşma daha faydalı olur zaten.
+Tamam ikisi birden.
+Şimdi güvenlik tarafına bakalım biraz.
+Güvenlikte ne konuşacağız?
+Şifre politikası ve oturum süresi.
+Şifre politikası şu an nedir?
+Şu an sekiz karakter, karmaşıklık yok.
+Sekiz karakter az.
+Az, on iki yapalım.
+On iki karakter kullanıcıyı zorlar.
+Zorlar ama iki faktörlü doğrulama koyarsak sekiz de yeter.
+İki faktörlü doğrulama var mı altyapıda?
+Var, kurumsal hesaplarda açık zaten.
+Açıksa kullanalım.
+Kullanalım, o zaman şifre sekiz kalsın.
+Oturum süresi ne kadar olsun?
+Şu an sekiz saat.
+Sekiz saat uzun bence.
+Ne olsun peki?
+Dört saat, sonra yenilensin.
+Dört saat sahada çalışanı zorlar mı?
+Zorlamaz, telefonda parmak izi var.
+Tamam dört saat.
+Yazdım.
+Bir de kayıt tutma süresi var.
+Kayıt ne kadar saklanacak?
+Yasal olarak beş yıl gerekiyor.
+Beş yıl bütün kayıtlar mı?
+Mali olanlar beş yıl, diğerleri iki yıl yeter.
+İki yıldan sonra ne olacak?
+Arşive taşınacak, silinmeyecek.
+Arşiv nerede duracak?
+Ayrı bir depoda, daha ucuz olanında.
+Ucuz depo yavaş olur ama.
+Yavaş olsun, zaten nadiren bakılıyor.
+Doğru, nadiren bakılıyor.
+Peki test tarafını konuşalım mı?
+Konuşalım, kim test edecek?
+Geliştiren test etmesin bence.
+Etmesin ama başka kimse yok şu an.
+O zaman en azından bir kontrol listesi olsun.
+Kontrol listesini kim hazırlar?
+Ben hazırlayabilirim.
+Sen hazırla, ben gözden geçiririm.
+Kaç maddelik bir liste olur?
+Otuz kırk madde civarı.
+Otuz kırk madde her sürümde mi çalışacak?
+Her sürümde değil, sadece ana sürümlerde.
+Ana sürüm ne sıklıkta çıkacak?
+Ayda bir diyelim.
+Ayda bir olur.
+Ara düzeltmeler nasıl gidecek?
+Ara düzeltmeler doğrudan gider, sadece ilgili ekran test edilir.
+O da mantıklı.
+Bir de otomatik test yazacak mıyız?
+Yazmak lazım ama zaman alır.
+Ne kadar zaman alır?
+Baştan yazmak iki hafta sürer.
+İki hafta üç aylık planın içinde var mı?
+Yok aslında.
+Yoksa sonraya bırakalım.
+Sonraya bırakalım ama unutmayalım.
+Unutmamak için listeye yazalım.
+Yazdım.
+Şimdi devreye alma planına bakalım.
+Devreye alma ne zaman olacak?
+Pilottan sonra, yani üç buçuk ay sonra.
+Üç buçuk ay sonra hangi hafta olur?
+Ay sonuna denk gelmesin, yoğun oluyor.
+Ay ortası daha iyi olur.
+Ay ortası, salı ya da çarşamba.
+Neden salı çarşamba?
+Pazartesi yoğun, cuma da sorun çıkarsa hafta sonuna kalıyor.
+Doğru, salı yapalım.
+Devreye alırken eski sistem açık kalacak mı?
+Bir ay paralel çalışsın.
+Bir ay paralel çalışmak iş yükü demek.
+Demek ama güvenli olan bu.
+Kim karar verecek kapanmasına?
+Yönetim karar verir, biz öneririz.
+Tamam.
+Bir de destek modeli konuşalım.
+Destek nasıl olacak?
+İlk ay biz bakarız, sonra yardım masasına devrederiz.
+Yardım masası bu sistemi bilmiyor ama.
+Bilmiyor, o yüzden onlara da eğitim vermek lazım.
+Onlar kaç kişi?
+Üç kişi.
+Üç kişiye ayrı bir oturum yaparız.
+Ayrı oturum daha teknik olsun.
+Teknik olsun, sık sorulanlarla birlikte.
+Sık sorulanları nereden bileceğiz?
+Pilottan çıkacak zaten.
+Pilottan çıkanları oraya yazarız.
+Güzel, o zaman sıralama şöyle oluyor.
+Önce geliştirme, sonra pilot, sonra eğitim, sonra devreye alma.
+Aynen öyle.
+Bir de arada test var.
+Test pilotla birlikte yürür.
+Tamam, netleşti.
+Başka eklemek isteyen var mı?
+Benden bu kadar.
+Ben de bir şey sormak istiyorum.
+Sor.
+Bu proje bittikten sonra bakımı kim yapacak?
+İyi soru aslında.
+Çünkü bu tarz şeyler bitiyor, sonra sahipsiz kalıyor.
+Kalıyor evet, o yüzden bir sahip belirlemek lazım.
+Sahip kişi mi olsun, birim mi?
+Birim olsun, kişi ayrılırsa boşluk olmasın.
+Birim olarak bilgi işlem uygun.
+Bilgi işlem kabul eder mi?
+Yükü belliyse eder.
+Yükü nasıl belirleyeceğiz?
+Aylık kaç saat bakım gerekiyor, onu ölçelim pilotta.
+Pilotta ölçeriz, iyi fikir.
+Tamam o zaman gerçekten bitiriyorum.
+Teşekkürler herkese.

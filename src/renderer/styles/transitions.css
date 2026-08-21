@@ -1,0 +1,74 @@
+/* View transitions. Armed only after the first paint (app/bootstrap.ts) — played on the
+   very first frame they animate a page that is still assembling. */
+/* App-specific styles layered on top of Bootstrap and the token/shell sheets.
+   Covers the Record focus panel and the shared transcript/analysis blocks reused in
+   the Dashboard detail. */
+
+/* Class-driven display:flex on the views would otherwise beat the [hidden] attribute
+   (equal specificity), so make hidden win outright. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* ========================== VIEW TRANSITIONS ========================== */
+
+/* Views and panes are swapped by toggling [hidden], and a CSS animation restarts every
+   time an element goes from display:none back to displayed — so these need no JS hook and
+   cannot desync from the router.
+
+   Two scales of motion, matching the two scales of navigation:
+   - view-in for Record <-> the shell, the full change of context.
+   - pane-in for the panes inside the shell, where sidebar and topbar stay put; the
+     smaller move is what says "same page, different content".
+
+   view-in deliberately leaves opacity alone. Fading between the dark Record canvas and
+   the light shell shows the body background through the gap for a frame or two — a white
+   flash on the way into Record. Blur + scale reads as a transition while staying opaque
+   from the first frame.
+
+   Not gated behind prefers-reduced-motion: this machine runs with Windows' "Animation
+   effects" off, which Chromium reports as `reduce` — the gate silently removed every
+   transition here. What's left is transform/filter/opacity on the incoming view only,
+   none of it the parallax-scale motion that preference exists to suppress. */
+@keyframes view-in {
+  from {
+    transform: scale(1.035);
+    filter: blur(6px);
+  }
+  to {
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes pane-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Everything here waits for .nav-ready, which app/bootstrap.ts sets once the first paint is done.
+   These are *navigation* transitions: on boot the same animation runs over a page that is
+   still assembling itself, and blurring/scaling a half-laid-out screen reads as a glitch
+   rather than as motion. */
+/* Every view root that is a full change of context. */
+.nav-ready .record-view,
+.nav-ready .dashboard-view {
+  animation: view-in 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.nav-ready #listPane,
+.nav-ready #detailPane,
+.nav-ready #settingsPane,
+.nav-ready #settingsAdvancedPane,
+.nav-ready #settingsModelPane {
+  animation: pane-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

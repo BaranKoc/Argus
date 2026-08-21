@@ -1,0 +1,588 @@
+/* Hand-built dialogs (no Bootstrap JS): analysis editor, viewer, speaker naming, PDF
+   preview. Shared by the dashboard detail pane. */
+/* ======================= Edit / viewer modal ======================= */
+
+.edit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(38, 34, 29, 0.5);
+  backdrop-filter: blur(6px);
+  padding: 24px;
+  animation: modal-backdrop-in 0.2s ease both;
+}
+/* Close is a two-step handshake with dashboard-view.ts: it sets .is-closing, waits for
+   this animation to end, and only then sets [hidden]. Without that the element would
+   vanish on the same frame and the exit would never be seen. */
+.edit-modal-backdrop.is-closing {
+  animation: modal-backdrop-out 0.16s ease both;
+}
+.edit-modal-backdrop.is-closing .edit-modal {
+  animation: modal-panel-out 0.16s ease both;
+}
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes modal-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.975);
+  }
+}
+@keyframes modal-panel-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+.edit-modal {
+  width: 100%;
+  max-width: 720px;
+  max-height: min(86vh, 780px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-0);
+  border-radius: 14px;
+  box-shadow: 0 24px 70px -12px rgba(28, 25, 21, 0.42);
+  overflow: hidden;
+  animation: modal-panel-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.edit-modal-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  background: linear-gradient(90deg, var(--surface-2), transparent);
+  border-bottom: 1px solid var(--sneat-border, #eceef1);
+}
+.edit-modal-header h5 {
+  color: var(--sneat-heading, #384252);
+  font-size: 16px;
+  font-weight: 600;
+}
+.edit-modal-header .icon-btn {
+  flex: none;
+  font-size: 22px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  margin: 0;
+}
+.edit-modal-header .icon-btn:hover {
+  color: var(--sneat-heading);
+  background: var(--surface-3);
+}
+.edit-modal-body {
+  padding: 20px 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* Read-only viewer (Dökümü Gör / Analizi Gör): same shell, no footer, just wider for the
+   transcript/analysis content it holds. */
+.viewer-modal {
+  max-width: 860px;
+}
+
+.reanalyze-modal {
+  max-width: 560px;
+}
+.reanalyze-message {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--sneat-text);
+}
+.reanalyze-setting {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid var(--sneat-border, #eceef1);
+  border-radius: 8px;
+  background: var(--surface-1);
+}
+.reanalyze-setting-help {
+  margin: 7px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--sneat-muted);
+}
+.reanalyze-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--sneat-muted);
+}
+.reanalyze-status.is-error {
+  background: rgba(168, 84, 84, 0.1);
+  color: #a85454;
+}
+
+/* Speaker naming: one card per diarization label, each holding the two pieces of evidence
+   the user needs to put a name to it — what the analysis credits them with, and what they
+   actually said — above the name field. Wide like the viewer, since the two evidence
+   columns are what the panel is for. */
+.speaker-names-modal {
+  max-width: 900px;
+}
+.speaker-names-intro {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sneat-muted);
+}
+.speaker-name-row {
+  padding: 14px 16px;
+  border: 1px solid var(--sneat-border, #eceef1);
+  border-radius: 10px;
+  background: var(--surface-1);
+}
+/* One page per speaker: the outgoing page is simply hidden, so there is no exit animation
+   to pair with — animating both at once would need a positioning layer this panel does
+   not earn. The entry slides from the side the user is travelling towards. */
+@keyframes speaker-page-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+@keyframes speaker-page-in-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+.speaker-name-row.is-entering-next {
+  animation: speaker-page-in-next 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.speaker-name-row.is-entering-prev {
+  animation: speaker-page-in-prev 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.speaker-pager-nav {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* The step counter sits between the two buttons, so it must not also push them apart —
+   .edit-modal-count's own margin-right:auto belongs to the group, not to the counter. */
+.speaker-pager-nav .edit-modal-count {
+  margin-right: 0;
+  min-width: 44px;
+  text-align: center;
+}
+.speaker-name-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.speaker-name-label {
+  font-weight: 600;
+  color: var(--sneat-heading);
+}
+.speaker-name-count {
+  font-size: 12.5px;
+  color: var(--sneat-muted);
+}
+.speaker-name-evidence {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+/* Below the modal's comfortable width the two columns stop being readable side by side. */
+@media (max-width: 720px) {
+  .speaker-name-evidence {
+    grid-template-columns: 1fr;
+  }
+}
+.speaker-name-column h6 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sneat-muted);
+}
+/* Uncapped on purpose: with one speaker to a page there is room to show every turn, and a
+   scroller inside the column would be a second scrollbar next to the modal body's own. */
+.speaker-name-list {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--sneat-text);
+}
+.speaker-name-list p {
+  margin: 0 0 6px;
+}
+.speaker-name-list p:last-child {
+  margin-bottom: 0;
+}
+.speaker-name-section {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--sneat-muted);
+}
+.speaker-name-empty {
+  font-style: italic;
+  color: var(--sneat-muted);
+}
+.speaker-name-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.speaker-name-field label {
+  flex: none;
+  font-size: 13px;
+  color: var(--sneat-muted);
+}
+.speaker-name-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.speaker-name-error {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: #a85454;
+}
+
+/* ---------------------------- PDF preview ---------------------------- */
+/* Sized to a document rather than to its content: an A4 page at a readable zoom needs the
+   height, and a modal that resized itself per PDF would jump between meetings. */
+.pdf-modal {
+  max-width: 1080px;
+  width: 100%;
+  height: min(92vh, 1000px);
+  max-height: 92vh;
+}
+.pdf-modal-header {
+  gap: 16px;
+}
+/* Actions sit in the header (top-right) instead of a footer — the viewer owns the whole
+   body, so a footer would steal page height from the document itself. */
+.pdf-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex: none;
+}
+.pdf-modal-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.pdf-modal-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid rgba(105, 108, 255, 0.18);
+  border-bottom: 1px solid rgba(105, 108, 255, 0.18);
+  background: rgba(105, 108, 255, 0.08);
+  color: var(--sneat-text);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.pdf-modal-notice[hidden] {
+  display: none;
+}
+.pdf-modal-notice .bx {
+  flex: none;
+  color: var(--sneat-primary, #696cff);
+  font-size: 20px;
+}
+/* Kept out of the host page's selection on purpose. A selection range that spans an
+   <iframe> paints it as one solid blue block — so a Ctrl+A on the dashboard (the modal
+   markup sits at the end of <body>, inside that range) covered the whole viewer, and
+   clicking the PDF never cleared it because the plugin is a different frame. Selecting
+   text inside the document still works: that selection belongs to the viewer, not to us. */
+.pdf-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  background: var(--surface-2);
+  user-select: none;
+}
+/* The viewer is Chromium's own PDF plugin; it needs a real box to fill, and a border of
+   its own would double up with the modal's rounded corner. */
+.pdf-modal-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.pdf-modal-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--sneat-muted);
+  padding: 24px;
+  text-align: center;
+}
+.pdf-modal-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 480px;
+}
+.pdf-modal-error .bx-error-circle {
+  font-size: 34px;
+  color: #a85454;
+}
+.pdf-modal-error-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sneat-heading);
+}
+/* The underlying error text, wrapped and selectable — it is the only thing that says what
+   actually went wrong, so it must be readable and copyable rather than truncated. */
+.pdf-modal-error-detail {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--sneat-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+@media (max-width: 900px) {
+  /* Labels are the first thing to go when the header can't hold four buttons and a title. */
+  .pdf-modal-actions .btn {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .pdf-modal-actions .btn .label {
+    display: none;
+  }
+}
+.edit-modal-footer {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--sneat-border, #eceef1);
+}
+/* Row count, pushed opposite the buttons — the footer was otherwise dead space and the
+   editor gave no feedback that "Satır Ekle" had done anything once the list scrolled. */
+.edit-modal-count {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--sneat-muted);
+}
+
+/* No animation-duration override here any more — same call, same reason as view-in/pane-in
+   at the top of this file. It used to collapse the modal's keyframes to 0.01ms while every
+   other motion (all the transition rules, view-in/pane-in, the orb) ignored the preference,
+   so one Windows toggle decided whether a single widget moved. The speaker pager was added
+   under that override and silently arrived dead on a machine with "Animation effects" off.
+   Motion here is short, small-amplitude and non-looping; only hover/press movement below is
+   still toned down. */
+@media (prefers-reduced-motion: reduce) {
+  /* Colour/opacity feedback survives; only the movement is dropped. */
+  .dashboard-view .btn:hover,
+  .dashboard-view .btn:active,
+  .dashboard-view .icon-btn:hover,
+  .dashboard-view .icon-btn:active,
+  .edit-modal .icon-btn:hover,
+  .edit-modal .icon-btn:active,
+  .dashboard-view .edit-btn:hover,
+  .dashboard-view .edit-btn:active {
+    transform: none;
+  }
+  .meeting-row .btn[data-action='open']::after,
+  .detail-head #backToList::after,
+  .view-card-body .btn::after {
+    display: none;
+  }
+}
+
+.edit-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid var(--sneat-border, #eceef1);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--sneat-heading);
+  resize: vertical;
+}
+.edit-textarea:focus,
+.form-control:focus {
+  border-color: var(--brand-400);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+.edit-textarea-modal {
+  min-height: 220px;
+}
+
+.edit-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Rows are a grid (handle · index · field · actions) rather than a flex line so every
+   row's controls stay on the same columns no matter how tall its text grows. */
+.edit-row {
+  display: grid;
+  grid-template-columns: 22px 22px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--sneat-border);
+  border-radius: 10px;
+  background: var(--surface-0);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.edit-row:focus-within {
+  border-color: var(--brand-300);
+  box-shadow: 0 0 0 3px rgba(77, 123, 161, 0.1);
+}
+
+/* Drag-to-reorder, same interaction as the meeting list: grip on the left, row lifts while
+   held, neighbours slide via FLIP. Replaces the old up/down arrow pair. */
+.edit-row-handle {
+  padding: 5px 0 0;
+  border: none;
+  background: transparent;
+  color: var(--neutral-300);
+  cursor: grab;
+  font-size: 17px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+.edit-row:hover .edit-row-handle {
+  color: var(--neutral-400);
+}
+.edit-row-handle:hover {
+  color: var(--brand-600);
+}
+.edit-row-handle:active {
+  cursor: grabbing;
+}
+.edit-row.dragging {
+  background: var(--surface-2);
+  border-color: var(--brand-300);
+  box-shadow: var(--shadow-lg);
+  opacity: 0.97;
+  position: relative;
+  z-index: 2;
+}
+/* While a drag is in flight the hover tints would light up whatever row the cursor
+   happens to cross, competing with the held row for attention. */
+.edit-rows.reordering .edit-row:not(.dragging) {
+  background: var(--surface-0);
+}
+.edit-rows.reordering .edit-row-handle {
+  color: var(--neutral-300);
+}
+.edit-rows.reordering .edit-row-field {
+  pointer-events: none;
+}
+
+.edit-row-index {
+  padding-top: 7px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--sneat-muted);
+  text-align: right;
+  user-select: none;
+}
+
+/* The field is a auto-growing textarea, not a single-line <input>: analysis rows are
+   full sentences, and in the old input everything past the first ~70 characters was
+   simply scrolled out of sight with no indication it was there. */
+/* Borderless with an inset box-shadow standing in for the border: under border-box
+   sizing, scrollHeight excludes the border, so a real 1px border would make autoGrow()
+   set a height 2px short and clip the last line. */
+.edit-row-field {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--sneat-heading);
+  resize: none;
+  overflow: hidden;
+}
+.edit-row-field:focus {
+  outline: none;
+  background: var(--surface-0);
+  box-shadow: inset 0 0 0 1px var(--brand-200);
+}
+
+.edit-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-top: 2px;
+}
+.edit-row-actions .icon-btn {
+  margin: 0;
+  padding: 4px 5px;
+  border-radius: 6px;
+  font-size: 17px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.edit-row-delete {
+  color: var(--neutral-400);
+}
+.edit-row-delete:hover {
+  color: #a85454;
+  background: rgba(168, 84, 84, 0.1);
+}
+
+.edit-add-row {
+  margin-top: 14px;
+  width: 100%;
+  border-style: dashed;
+}
+.edit-rows-empty {
+  padding: 22px 12px;
+  text-align: center;
+  color: var(--sneat-muted);
+  font-size: 14px;
+  border: 1px dashed var(--neutral-300);
+  border-radius: 10px;
+}
+/* Icon-only variant of .record-nav: the label moves into the hover tooltip, so the
+   Record canvas stays free of chrome text. Both nav actions use it, which is what keeps
+   the two circles the same size. */

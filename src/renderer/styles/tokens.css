@@ -1,0 +1,65 @@
+/* Design tokens: the brand ramps and surface/text variables every other sheet reads.
+   Lifted verbatim from the Sneat header so a colour is defined once, here. */
+/* Sneat-flavored layer over Bootstrap 5. Sneat's free template isn't an npm package and
+   the app is strictly offline, so rather than copy its compiled assets we reproduce its
+   signature look on top of vendored Bootstrap: the light admin shell (sidebar + topbar),
+   soft "label" badges (bg-label-*), and card polish. Same class vocabulary UI_01 asks
+   for, fully local. */
+
+/* One palette for the whole app: a single blue ramp (brand-50…900) plus a cool neutral
+   ramp. The Record panel's dark canvas is the deep end of this same ramp, so moving
+   between the focus view and the dashboard reads as one product rather than two themes.
+   Every hard-coded color below resolves to a token here — change the ramp, not the rules. */
+/* The ramp is deliberately *desaturated* — a natural steel/slate blue rather than a
+   screen-bright one. Same hue throughout (~210°); only chroma was pulled back, so the
+   identity is unchanged while large fills (sidebar, record canvas) stop vibrating. */
+:root {
+  --brand-50: #f4f7fa;
+  --brand-100: #e7eef4;
+  --brand-200: #d2dfea;
+  --brand-300: #a9c1d6;
+  --brand-400: #7397b7;
+  --brand-500: #4d7ba1;
+  --brand-600: #3d6485;
+  --brand-700: #2f4e69;
+  --brand-800: #243c51;
+  --brand-900: #1a2c3c;
+
+  /* Light surfaces are warm-neutral, NOT tinted with the brand blue. The dashboard is
+     the read-heavy screen, and a blue-cast white is what makes a long session tiring —
+     this is the "blue filter" direction, a hair of warmth pulled through the whole
+     light ramp. The blue survives only as accents (buttons, borders, active states);
+     the sidebar and the record panel keep their own deep-blue identity and take none
+     of these tokens. */
+  --surface-0: #fdfdfc;
+  --surface-1: #f8f7f5;
+  --surface-2: #f2f1ee;
+  --surface-3: #eae8e4;
+
+  --neutral-50: var(--surface-1);
+  --neutral-100: var(--surface-2);
+  --neutral-200: #e7e5e0;
+  --neutral-300: #d3d0ca;
+  --neutral-400: #9b978f;
+  --neutral-600: #5f5c56;
+  --neutral-800: #2b2926;
+
+  --sneat-bg: var(--surface-1);
+  --sneat-sidebar-w: 248px;
+  --sneat-text: var(--neutral-600);
+  --sneat-heading: var(--neutral-800);
+  --sneat-border: var(--neutral-200);
+  --sneat-primary: var(--brand-500);
+  --sneat-muted: var(--neutral-400);
+
+  /* One elevation scale, tinted with the brand hue so shadows sit in the palette
+     instead of reading as neutral grey smudges. */
+  --shadow-sm: 0 1px 2px rgba(52, 47, 40, 0.05), 0 1px 3px rgba(52, 47, 40, 0.045);
+  --shadow-md: 0 4px 16px -4px rgba(52, 47, 40, 0.1), 0 2px 6px -2px rgba(52, 47, 40, 0.06);
+  --shadow-lg: 0 18px 40px -12px rgba(52, 47, 40, 0.2);
+}
+
+body {
+  background: var(--sneat-bg);
+  color: var(--sneat-text);
+}

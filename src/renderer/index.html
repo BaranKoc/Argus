@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- img-src allows data: because Bootstrap embeds a few SVG control icons as data
+         URIs; everything else stays 'self' (bundled) for the offline guarantee.
+         frame-src adds blob: for the PDF preview: the bytes arrive over IPC and are wrapped
+         in a blob: URL, and without an explicit frame-src the iframe would fall back to
+         default-src 'self' and be blocked. No remote origin is added by either. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'self' blob:"
+    />
+    <title>Argus</title>
+  </head>
+  <body>
+    <!-- ============================ RECORD (focus) ============================ -->
+    <!-- Full-screen, sidebar-less. The `state-*` class on this root drives the
+         background gradient; record-view.ts swaps it per live state. Part of the
+         Kullanıcı panel even though it sits outside that panel's shell. -->
+    <section id="recordView" class="record-view state-idle" hidden>
+      <div class="record-nav-actions">
+        <button
+          id="toSettingsBtn"
+          class="record-nav record-nav-icon has-tooltip"
+          type="button"
+          aria-label="Ayarlar&#305; A&#231;"
+          data-tooltip="Ayarlar&#305; A&#231;"
+        >
+          <i class="bx bx-cog"></i>
+        </button>
+        <button
+          id="toDashboardBtn"
+          class="record-nav record-nav-icon has-tooltip"
+          type="button"
+          aria-label="Kay&#305;tlar&#305; A&#231;"
+          data-tooltip="Kay&#305;tlar&#305; A&#231;"
+        >
+          <i class="bx bx-list-ul"></i>
+        </button>
+      </div>
+
+      <div class="brand-lockup record-brand">
+        <strong class="brand-lockup-word">ARGUS</strong>
+        <p class="brand-lockup-name">Kararları Görür</p>
+      </div>
+
+      <div class="record-center">
+        <div class="record-orb"></div>
+        <p id="recordText" class="record-text">Hazır olunca kaydı başlatabilirsiniz</p>
+        <p id="recordKvkk" class="record-kvkk" hidden>
+          🔒 KVKK: Ses kaydı işlendikten sonra otomatik olarak silindi; yalnızca döküm ve
+          analiz saklanıyor.
+        </p>
+      </div>
+
+      <!-- Sits directly above the start button: both choices are locked for the whole
+           meeting, so this is the last decision before starting. Each group carries a
+           visible label; with two pill rows an aria-label alone leaves the second row
+           unreadable. No explanatory copy under either group on purpose — the labels and
+           the option names carry it, and a standing paragraph on the record canvas was
+           more clutter than help. -->
+      <div id="recordChoices" class="record-choices">
+        <div class="record-choice-row">
+          <div id="recordLanguage" class="record-choice-group">
+            <span class="record-choice-label" id="recordLanguageLabel">Toplantı dili</span>
+            <div class="record-choice-options" role="radiogroup" aria-labelledby="recordLanguageLabel">
+              <button type="button" class="record-choice-option selected" data-language="turkish"
+                      role="radio" aria-checked="true">Türkçe</button>
+              <button type="button" class="record-choice-option" data-language="foreign"
+                      role="radio" aria-checked="false">Yabancı dil</button>
+            </div>
+          </div>
+          <div id="recordScope" class="record-choice-group">
+            <span class="record-choice-label" id="recordScopeLabel">Toplantı türü</span>
+            <div class="record-choice-options" role="radiogroup" aria-labelledby="recordScopeLabel">
+              <button type="button" class="record-choice-option selected" data-scope="group"
+                      role="radio" aria-checked="true">Grup toplantısı</button>
+              <button type="button" class="record-choice-option" data-scope="two-party"
+                      role="radio" aria-checked="false">Online İkili Görüşme</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="record-controls">
+        <button id="startBtn" class="rc-btn rc-primary" type="button">
+          <i class="bx bx-microphone"></i> Kayıt Başlat
+        </button>
+        <button id="pauseBtn" class="rc-btn" type="button" hidden>
+          <i class="bx bx-pause-circle"></i> Mola Ver
+        </button>
+        <button id="stopBtn" class="rc-btn rc-danger" type="button" hidden>
+          <i class="bx bx-stop-circle"></i> Kaydı Bitir
+        </button>
+        <!-- Only reachable after "Kaydı Bitir": while the transcript/analysis pipeline
+             runs, this is the way out of a meeting that should never be saved. -->
+        <button id="cancelRunBtn" class="rc-btn rc-danger" type="button" hidden>
+          <i class="bx bx-x-circle"></i> Toplantıyı İptal Et
+        </button>
+        <button id="resultsBtn" class="rc-btn rc-success" type="button" hidden>
+          Sonuçları Gör <i class="bx bx-right-arrow-alt"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ======================= APPLICATION SHELL (dashboard + settings) ======================= -->
+    <!-- Everything except the Record view lives in this shell, so the
+         sidebar and topbar survive navigation between pages: #listPane / #detailPane /
+         #settingsPane are swapped inside .sneat-content while the chrome stays put
+         (see app/router.ts). -->
+    <section id="userShellView" class="dashboard-view" hidden>
+      <aside class="sneat-sidebar">
+        <!-- The collapse control sits inside the panel it closes: while the sidebar is open
+             this « is the only way to close it, and it slides out with the panel. -->
+        <div class="sidebar-head">
+          <div class="app-brand" aria-label="Argus">
+            <strong class="app-brand-word">ARGUS</strong>
+            <span class="app-brand-name">Kararları Görür</span>
+          </div>
+          <button
+            id="sidebarCollapseBtn"
+            class="sidebar-collapse-btn has-tooltip tooltip-end"
+            type="button"
+            aria-label="Yan Paneli Kapat"
+            data-tooltip="Yan Paneli Kapat"
+          >
+            <i class="bx bx-chevrons-left"></i>
+          </button>
+        </div>
+        <!-- data-nav-view names the router view each item leads to; user-shell.ts uses it to
+             move the .active rail instead of hard-coding one item per page. -->
+        <ul class="menu">
+          <li class="menu-item" data-nav-view="record">
+            <a id="navNewRecording" class="menu-link" href="#"><i class="bx bx-microphone"></i> Yeni Kayıt</a>
+          </li>
+          <li class="menu-item active" data-nav-view="dashboard">
+            <a id="navRecordings" class="menu-link" href="#"><i class="bx bx-list-ul"></i> Kayıtlar</a>
+          </li>
+          <li class="menu-item" data-nav-view="settings">
+            <a id="navSettings" class="menu-link" href="#"><i class="bx bx-cog"></i> Ayarlar</a>
+          </li>
+        </ul>
+      </aside>
+
+      <div class="sneat-main">
+        <nav class="sneat-topbar">
+          <!-- Reopen only: CSS hides it while the sidebar is open, since the panel carries
+               its own « then. Fixed icon — » is always "bring the panel back". -->
+          <button
+            id="sidebarOpenBtn"
+            class="topbar-icon-btn sidebar-open-btn has-tooltip"
+            type="button"
+            aria-label="Yan Paneli A&#231;"
+            data-tooltip="Yan Paneli A&#231;"
+          >
+            <i class="bx bx-chevrons-right"></i>
+          </button>
+          <span id="topbarTitle" class="topbar-title">Toplantı Kayıtları</span>
+        </nav>
+
+        <div class="sneat-content">
+          <!-- LIST -->
+          <div id="listPane">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Toplantılar</h5>
+                <button id="newRecordingBtn" class="btn btn-primary btn-sm" type="button">
+                  <i class="bx bx-microphone"></i> Yeni Kayıt
+                </button>
+              </div>
+              <div class="table-responsive">
+                <!-- No <thead>: grip, meeting name and icon actions already read clearly on
+                     their own. -->
+                <table class="table table-hover mb-0">
+                  <tbody id="meetingTableBody"></tbody>
+                </table>
+              </div>
+              <div id="listEmpty" class="empty-state" hidden>
+                Henüz kayıt yok. “Yeni Kayıt” ile başlayın.
+              </div>
+            </div>
+          </div>
+
+          <!-- DETAIL (split) -->
+          <div id="detailPane" hidden>
+            <div class="detail-head">
+              <button id="backToList" class="btn btn-outline-secondary btn-sm" type="button">
+                <i class="bx bx-arrow-back"></i> Listeye Dön
+              </button>
+              <h5 id="detailTitle" class="mb-0"></h5>
+              <!-- Export on the left, the two meeting-wide actions stacked to its right.
+                   Export is centred against the stack, so it stays put while that grows. -->
+              <div class="detail-head-actions">
+                <div class="btn-group">
+                  <button
+                    id="detailExportBtn"
+                    class="btn btn-primary btn-sm btn-icon-only dropdown-toggle has-tooltip"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="Dışa Aktar"
+                    data-tooltip="Dışa Aktar"
+                  >
+                    <i class="bx bx-export"></i>
+                  </button>
+                  <ul id="detailExportMenu" class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" href="#" data-action="pdf-preview">
+                        <i class="bx bx-file"></i> PDF Göster
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#" data-action="share">
+                        <i class="bx bx-share-alt"></i> Paylaş
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <!-- The icon is what separates these from the two above: they write a file
+                         to disk, the ones above act on the document in place. -->
+                    <li>
+                      <a class="dropdown-item" href="#" data-format="md">
+                        <i class="bx bx-download"></i> Markdown (.md)
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#" data-format="pdf">
+                        <i class="bx bx-download"></i> PDF (.pdf)
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <div id="detailActions" class="detail-actions">
+                  <button id="detailReanalyzeBtn" class="btn btn-gradient btn-gradient-teal btn-sm" type="button">
+                    <i class="bx bx-refresh"></i> Yeniden Analiz Et
+                  </button>
+                  <button
+                    id="detailNameSpeakersBtn"
+                    class="btn btn-gradient btn-gradient-indigo btn-sm detail-action-collapsible"
+                    type="button"
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
+                    <i class="bx bx-user-voice"></i> Konuşmacıları Adlandır
+                  </button>
+                  <button
+                    id="detailUndoEditBtn"
+                    class="btn btn-gradient btn-gradient-amber btn-sm detail-action-collapsible"
+                    type="button"
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
+                    <i class="bx bx-undo"></i> Yapılan Değişiklikleri Geri Al
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- The scroller, holding everything below the head. It is this wrapper rather
+                 than .detail-grid itself: a grid that is also the scroll container ends up
+                 with a definite, shrunk height as a flex item, and the two full-width cards
+                 (overflow:hidden for their radius) then clip their own content instead of
+                 the wrapper scrolling. -->
+            <div class="detail-scroll">
+              <div class="detail-grid">
+                <div class="card detail-transcript-card">
+                  <div class="card-header"><h6 class="mb-0">Döküm</h6></div>
+                  <div class="card-body view-card-body">
+                    <p id="transcriptMeta" class="view-card-meta"></p>
+                    <button id="transcriptViewBtn" class="btn btn-outline-primary btn-sm" type="button">
+                      <i class="bx bx-show"></i> Dökümü Gör
+                    </button>
+                  </div>
+                  <!-- Kept in the DOM (off-screen) as the real source: the viewer modal
+                       reads this on open, exports/edits already point at it. -->
+                  <div id="detailTranscript" class="segment-list" hidden></div>
+                </div>
+
+                <!-- Shown only when the meeting has no analysis at all. Without it, a
+                     failed analysis is indistinguishable from an analysis that simply
+                     found nothing — both render nine "İçerik yok" cards. -->
+                <div id="detailNoAnalysis" class="detail-no-analysis" role="status" hidden>
+                  <i class="bx bx-error-circle"></i>
+                  <span>Bu toplantının analizi yok — dökümü kaydedildi. Yukarıdaki
+                    <strong>Yeniden Analiz Et</strong> ile oluşturabilirsiniz.</span>
+                </div>
+
+                <!-- The nine section cards below split the same analysis up; this card is the
+                     undivided read of it, so it sits full-width next to Döküm rather than in
+                     the grid. -->
+                <div class="card detail-analysis-card">
+                  <div class="card-header"><h6 class="mb-0">Detaylı Analiz</h6></div>
+                  <div class="card-body view-card-body">
+                    <p id="analysisFullMeta" class="view-card-meta"></p>
+                    <button id="analysisFullViewBtn" class="btn btn-outline-primary btn-sm" type="button">
+                      <i class="bx bx-show"></i> Analizi Gör
+                    </button>
+                  </div>
+                </div>
+
+                <div id="analysisSectionCards" class="analysis-section-grid"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div id="settingsPane" hidden>
+            <div class="settings-layout">
+              <nav class="settings-nav" role="tablist" aria-label="Ayar bölümleri">
+                <button class="settings-nav-item active" type="button" role="tab"
+                        data-settings-page="advanced" aria-selected="true">
+                  <i class="bx bx-user-voice"></i> Konuşmacı ayrımı
+                </button>
+                <button class="settings-nav-item" type="button" role="tab"
+                        data-settings-page="model" aria-selected="false">
+                  <i class="bx bx-brain"></i> Analiz modeli
+                </button>
+              </nav>
+              <div class="settings-card card">
+                <section id="settingsAdvancedPane" class="settings-pane">
+                  <div id="diarizationSection" class="card-body">
+                    <div class="settings-section-head">
+                      <h6>Konu&#351;mac&#305; ayr&#305;m&#305;</h6>
+                      <span class="settings-badge settings-badge-info">GPU gerekir</span>
+                    </div>
+                    <p id="diarizationHint" class="text-muted mb-2"></p>
+                    <!-- A guide, not a warning: the feature works, it just has two
+                         prerequisites the user has to satisfy once. Both actions that
+                         satisfy them sit in the card, above the switch — the switch cannot
+                         do anything until they are done. Static content; the view only
+                         wires the two buttons. -->
+                    <div id="diarizationGuide" class="settings-guide">
+                      <i class="bx bx-info-circle"></i>
+                      <div>
+                        <p class="settings-guide-title">Konuşmacı ayrımı nasıl kurulur?</p>
+                        <p class="settings-guide-lead">
+                          Konuşmacı ayrımı, dökümdeki her cümleyi kimin söylediğini işaretler ve
+                          tamamen bu bilgisayarda çalışır &#8212; ses hiçbir yere gönderilmez.
+                          Bunun için NVIDIA ekran kartı ve bir kereye mahsus kurulan GPU desteği
+                          dosyası gerekir.
+                        </p>
+                        <ol class="settings-guide-steps">
+                          <li>
+                            <strong>NVIDIA sürücünüzün güncel olduğundan emin olun.</strong>
+                            Sürücü eskiyse kart bulunamaz. NVIDIA'nın resmî sayfasından ücretsiz
+                            indirilir. <em>CUDA Toolkit kurmanıza gerek yoktur</em>; gereken her
+                            şey GPU desteği dosyasının içindedir.
+                          </li>
+                          <li>
+                            <strong>GPU desteğini kurun.</strong> Installer ile birlikte verilen
+                            <strong>Argus-GPU-Destegi.7z</strong> dosyasını seçmeniz yeterli.
+                            Birkaç dakika sürer, yaklaşık 5 GB yer kaplar ve bir kez yapılır.
+                          </li>
+                          <li>
+                            <strong>Aşağıdaki anahtarı açın.</strong> Kurulum bittiğinde anahtar
+                            kendiliğinden kullanılabilir duruma gelir; uygulamayı yeniden
+                            başlatmanız gerekmez.
+                          </li>
+                        </ol>
+                        <!-- Inside the guide, right under the steps they belong to. The id
+                             stays gpuAddonBlock: the row is always on screen, and main says
+                             "already installed" rather than re-extracting 4.6 GB. -->
+                        <div id="gpuAddonBlock" class="settings-guide-actions">
+                          <button id="openNvidiaDriver" class="btn btn-outline-primary btn-sm" type="button">
+                            <i class="bx bx-link-external"></i> NVIDIA sürücüsünü indir
+                          </button>
+                          <button id="installGpuAddon" class="btn btn-primary btn-sm" type="button">
+                            <i class="bx bx-download"></i> GPU desteğini kur
+                          </button>
+                        </div>
+                        <p id="gpuAddonHint" class="text-muted mt-2 mb-0"></p>
+                        <p class="settings-guide-title mt-3">Bilmekte fayda var</p>
+                        <ul class="settings-guide-list">
+                          <li>
+                            <strong>Süre:</strong> döküm çıkarma süresini uzatır; GPU üzerinde
+                            bu artış 25 dakikalık bir toplantıda yaklaşık 1 dakikadır.
+                          </li>
+                          <li>
+                            <strong>En iyi sonuç:</strong> 3&#8211;4 kişilik online toplantılar
+                            için idealdir. Katılımcı sayısı arttığında da online toplantılarda
+                            iyi sonuç verebilir; herkesin sesi ayrı mikrofondan geldiği için
+                            konuşmacılar birbirinden net ayrışır.
+                          </li>
+                          <li>
+                            <strong>İki kişilik görüşme:</strong> açmanıza gerek yok. Dökümdeki
+                            <strong>Yerel</strong> / <strong>Uzak</strong> işareti iki tarafı
+                            zaten ayırır; konuşmacı ayrımı asıl işini aynı taraftaki birden
+                            fazla konuşmacıyı bölerken yapar. Kayıt ekranındaki
+                            <strong>Online İkili Görüşme</strong> seçeneği, bu ayar açık olsa
+                            bile o görüşme için konuşmacı ayrımını kapatır.
+                          </li>
+                          <li>
+                            <strong>Doğruluk:</strong> aynı odada tek mikrofona konuşan kalabalık
+                            toplantılar zor durumdur; bu koşulda etiketler hatalı olabilir.
+                          </li>
+                          <li>
+                            <strong>GPU bulunamazsa:</strong> toplantı konuşmacı etiketleri
+                            olmadan tamamlanır; döküm ve analiz bundan etkilenmez.
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                      <input id="diarizationEnabled" class="form-check-input" type="checkbox" role="switch" />
+                      <label class="form-check-label" for="diarizationEnabled">Pyannote ile konu&#351;mac&#305;lar&#305; ay&#305;r</label>
+                    </div>
+                    <p id="pyannoteStatus" class="settings-status" aria-live="polite"></p>
+                    <!-- No heading of its own: this only decides what happens to the labels
+                         the switch above produces, so it reads as part of that one setting. -->
+                    <div class="form-check form-switch mt-3 mb-2">
+                      <input
+                        id="analysisIncludeSpeakers"
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                      />
+                      <label class="form-check-label" for="analysisIncludeSpeakers">
+                        Konuşmacıları analize dahil et
+                      </label>
+                    </div>
+                    <p id="analysisSpeakersHint" class="text-muted mb-2"></p>
+                    <p id="settingsMessage" class="settings-message" aria-live="polite"></p>
+                  </div>
+                </section>
+                <section id="settingsModelPane" class="settings-pane" hidden>
+                  <div class="card-body">
+                    <div class="settings-section-head">
+                      <h6>Analiz modeli</h6>
+                    </div>
+                    <p class="text-muted mb-2">
+                      Toplantı dökümünü özetleyip aksiyonları çıkaran modeli seçin. Yerel
+                      Ollama seçeneğinde döküm bilgisayardan çıkmaz; bulut sağlayıcılarında
+                      analiz için ilgili servise gönderilir.
+                    </p>
+                    <div id="llmPresetGrid" class="llm-preset-grid" role="radiogroup"
+                         aria-label="Analiz modeli ön ayarları"></div>
+                    <div class="llm-fields">
+                      <div class="llm-field">
+                        <label class="form-label" for="llmModel">Model</label>
+                        <input id="llmModel" class="form-control" type="text"
+                               list="llmModelOptions" autocomplete="off" spellcheck="false" />
+                        <datalist id="llmModelOptions"></datalist>
+                        <p id="llmModelHint" class="llm-field-hint"></p>
+                      </div>
+                      <div id="llmHostRow" class="llm-field" hidden>
+                        <label class="form-label" for="llmHost">Sunucu adresi</label>
+                        <input id="llmHost" class="form-control" type="text" autocomplete="off"
+                               spellcheck="false" placeholder="http://localhost:1234/v1" />
+                        <p class="llm-field-hint">OpenAI uyumlu taban adres; sonuna /v1 ekleyin.</p>
+                      </div>
+                      <div id="llmApiKeyRow" class="llm-field" hidden>
+                        <label class="form-label" for="llmApiKey">API anahtarı</label>
+                        <input id="llmApiKey" class="form-control" type="password"
+                               autocomplete="off" spellcheck="false" />
+                        <p id="llmApiKeyHint" class="llm-field-hint"></p>
+                      </div>
+                    </div>
+                    <div class="llm-actions">
+                      <button id="llmSaveBtn" class="btn btn-primary btn-sm" type="button" disabled>Kaydet</button>
+                      <span id="llmBlocker" class="llm-blocker"></span>
+                    </div>
+                    <hr class="llm-divider" />
+                    <p id="llmStatus" class="settings-status" aria-live="polite"></p>
+                    <p id="llmScope" class="settings-status"></p>
+                    <p id="llmMessage" class="settings-message" aria-live="polite"></p>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ EDIT MODAL ============================ -->
+    <!-- Shared by all analysis section cards. Body is built/torn down per open() by
+         dashboard-view.ts. No Bootstrap JS in this app, so this is a hand-built dialog. -->
+    <div id="editModal" class="edit-modal-backdrop" hidden>
+      <div class="edit-modal" role="dialog" aria-modal="true">
+        <div class="edit-modal-header">
+          <h5 id="editModalTitle" class="mb-0"></h5>
+          <button id="editModalClose" class="icon-btn" type="button">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <div id="editModalBody" class="edit-modal-body"></div>
+        <div class="edit-modal-footer">
+          <span id="editModalCount" class="edit-modal-count"></span>
+          <button id="editModalCancel" class="btn btn-outline-secondary btn-sm" type="button">
+            İptal
+          </button>
+          <button id="editModalSave" class="btn btn-primary btn-sm" type="button">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= REANALYZE MODAL ========================= -->
+    <div id="reanalyzeModal" class="edit-modal-backdrop" hidden>
+      <div class="edit-modal reanalyze-modal" role="dialog" aria-modal="true" aria-labelledby="reanalyzeModalTitle">
+        <div class="edit-modal-header">
+          <h5 id="reanalyzeModalTitle" class="mb-0">Toplantıyı Yeniden Analiz Et</h5>
+          <button id="reanalyzeModalClose" class="icon-btn" type="button" aria-label="Kapat">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <div class="edit-modal-body">
+          <p id="reanalyzeModalMessage" class="reanalyze-message"></p>
+          <div class="reanalyze-setting">
+            <div class="form-check form-switch">
+              <input id="reanalyzeIncludeSpeakers" class="form-check-input" type="checkbox" role="switch" />
+              <label class="form-check-label" for="reanalyzeIncludeSpeakers">Konuşmacıları analize dahil et</label>
+            </div>
+            <p id="reanalyzeSpeakersHelp" class="reanalyze-setting-help"></p>
+          </div>
+          <div id="reanalyzeModalStatus" class="reanalyze-status" hidden></div>
+        </div>
+        <div class="edit-modal-footer">
+          <button id="reanalyzeModalCancel" class="btn btn-outline-secondary btn-sm" type="button">
+            İptal
+          </button>
+          <button id="reanalyzeModalSubmit" class="btn btn-primary btn-sm" type="button">
+            Yeniden Analiz Et
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================= SPEAKER NAMES MODAL ======================= -->
+    <!-- One PAGE per diarization label: what that speaker is on record for in the analysis
+         and what they said in the transcript, so the user can recognise them before
+         typing a name. Pages are built per open() by dashboard-view.ts and stay in the
+         DOM while hidden, so a name typed on one page survives a walk to another. -->
+    <div id="speakerNamesModal" class="edit-modal-backdrop" hidden>
+      <div
+        class="edit-modal speaker-names-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="speakerNamesModalTitle"
+      >
+        <div class="edit-modal-header">
+          <h5 id="speakerNamesModalTitle" class="mb-0">Konuşmacıları Adlandır</h5>
+          <button id="speakerNamesModalClose" class="icon-btn" type="button" aria-label="Kapat">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <div class="edit-modal-body">
+          <p class="speaker-names-intro">
+            Her konuşmacı için yeni bir ad girin. Boş bıraktığınız konuşmacı mevcut
+            etiketiyle kalır. Kaydettiğinizde döküm ve analiz birlikte güncellenir;
+            "Yapılan Değişiklikleri Geri Al" bu adlandırmayı da geri alır.
+          </p>
+          <div id="speakerNamesRows" class="speaker-pager"></div>
+        </div>
+        <div class="edit-modal-footer">
+          <div id="speakerNamesNav" class="speaker-pager-nav">
+            <button
+              id="speakerNamesPrev"
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+              aria-label="Önceki konuşmacı"
+            >
+              <i class="bx bx-chevron-left"></i> Önceki
+            </button>
+            <span id="speakerNamesCount" class="edit-modal-count" aria-live="polite"></span>
+            <button
+              id="speakerNamesNext"
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+              aria-label="Sonraki konuşmacı"
+            >
+              Sonraki <i class="bx bx-chevron-right"></i>
+            </button>
+          </div>
+          <button id="speakerNamesCancel" class="btn btn-outline-secondary btn-sm" type="button">
+            İptal
+          </button>
+          <button id="speakerNamesSave" class="btn btn-primary btn-sm" type="button">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================ VIEWER MODAL ============================ -->
+    <!-- Read-only sibling of #editModal: "Dökümü Gör" / "Özeti Gör" open full content
+         here, behind the same blurred backdrop, instead of the old inline collapsible. -->
+    <div id="viewerModal" class="edit-modal-backdrop" hidden>
+      <div class="edit-modal viewer-modal" role="dialog" aria-modal="true">
+        <div class="edit-modal-header">
+          <h5 id="viewerModalTitle" class="mb-0"></h5>
+          <button id="viewerModalClose" class="icon-btn" type="button">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <div id="viewerModalBody" class="edit-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- ============================ PDF PREVIEW ============================ -->
+    <!-- Same backdrop/animation shell as the edit and viewer modals, but sized to a
+         document and with its actions in the header instead of a footer. -->
+    <div id="pdfModal" class="edit-modal-backdrop" hidden>
+      <div class="edit-modal pdf-modal" role="dialog" aria-modal="true" aria-label="PDF Önizleme">
+        <div class="edit-modal-header pdf-modal-header">
+          <h5 id="pdfModalTitle" class="mb-0"></h5>
+          <div class="pdf-modal-actions">
+            <button id="pdfDownloadBtn" class="btn btn-sm btn-primary" type="button">
+              <i class="bx bx-download"></i> <span class="label">İndir</span>
+            </button>
+            <button id="pdfShareBtn" class="btn btn-sm btn-outline-secondary" type="button">
+              <i class="bx bx-share-alt"></i> <span class="label">Paylaş</span>
+            </button>
+            <button id="pdfPrintBtn" class="btn btn-sm btn-outline-secondary" type="button">
+              <i class="bx bx-printer"></i> <span class="label">Yazdır</span>
+            </button>
+            <button id="pdfModalClose" class="btn btn-sm btn-outline-secondary" type="button">
+              <i class="bx bx-x"></i> <span class="label">Kapat</span>
+            </button>
+          </div>
+        </div>
+        <div id="pdfModalNotice" class="pdf-modal-notice" role="status" aria-live="polite" hidden>
+          <i class="bx bx-info-circle"></i>
+          <span></span>
+        </div>
+        <div class="pdf-modal-body">
+          <div id="pdfModalStatus" class="pdf-modal-status">PDF hazırlanıyor…</div>
+          <iframe id="pdfModalFrame" class="pdf-modal-frame" title="PDF Önizleme" hidden></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

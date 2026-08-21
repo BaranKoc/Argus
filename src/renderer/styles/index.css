@@ -1,0 +1,12 @@
+/* The one stylesheet app/bootstrap.ts imports. Order is load-bearing, not alphabetical:
+   tokens first (everything below reads its variables), then the shared shell, then the
+   per-surface sheets. Later sheets deliberately override earlier ones at equal
+   specificity, so moving a line here changes the cascade. */
+@import './tokens.css';
+@import './shell.css';
+@import './transitions.css';
+@import './brand.css';
+@import './record.css';
+@import './dashboard.css';
+@import './modals.css';
+@import './settings.css';

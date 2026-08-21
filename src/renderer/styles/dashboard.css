@@ -1,0 +1,449 @@
+/* Meeting detail: the split view, transcript/analysis cards and the read-only card body,
+   plus the shared transcript+analysis rules that lived in the old flat style.css. */
+/* ============================ Detail (split) ============================ */
+
+/* flex:none, outside .detail-scroll — this bar carries the way back and the meeting-wide
+   actions, so it holds its place at the top of the pane, at full size, while the cards
+   below scroll under it. It neither moves nor resizes with the scroll. */
+.detail-head {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-0) 62%);
+  border: 1px solid var(--sneat-border);
+  border-left: 4px solid var(--brand-500);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-view .btn-primary {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-600) 100%);
+  box-shadow: 0 6px 16px -6px rgba(45, 78, 105, 0.5);
+}
+.dashboard-view .btn-primary:hover,
+.dashboard-view .btn-primary:focus-visible {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand-400) 0%, var(--brand-700) 100%);
+  box-shadow: 0 8px 20px -6px rgba(45, 78, 105, 0.62);
+}
+
+/* .btn-primary's recipe with the hue lifted out into a variable, so the three meeting-wide
+   actions can each carry their own colour and still read as one family: export keeps the
+   brand blue, "Yeniden Analiz Et" is teal (it rebuilds), "Geri Al" is amber (it reverts).
+   Hover widens the ramp the same way .btn-primary does — lighter start, darker end. */
+.dashboard-view .btn-gradient {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--btn-grad-from) 0%, var(--btn-grad-to) 100%);
+  box-shadow: 0 6px 16px -6px var(--btn-grad-shadow);
+}
+.dashboard-view .btn-gradient:hover,
+.dashboard-view .btn-gradient:focus-visible {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--btn-grad-from) 82%, white) 0%,
+    color-mix(in srgb, var(--btn-grad-to) 82%, black) 100%
+  );
+  box-shadow: 0 8px 20px -6px var(--btn-grad-shadow);
+}
+.btn-gradient-teal {
+  --btn-grad-from: #4f9a91;
+  --btn-grad-to: #336861;
+  --btn-grad-shadow: rgba(51, 104, 97, 0.55);
+}
+.btn-gradient-amber {
+  --btn-grad-from: #c08c47;
+  --btn-grad-to: #8b6127;
+  --btn-grad-shadow: rgba(139, 97, 39, 0.55);
+}
+.btn-gradient-indigo {
+  --btn-grad-from: #6f7ac4;
+  --btn-grad-to: #454f9a;
+  --btn-grad-shadow: rgba(69, 79, 154, 0.55);
+}
+
+.detail-head h5 {
+  color: var(--sneat-heading);
+  max-width: 100%;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail-head #backToList {
+  justify-self: start;
+  color: var(--brand-700);
+  border-color: var(--neutral-300);
+  background: rgba(253, 253, 252, 0.75);
+}
+.detail-head #backToList:hover {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand-400) 0%, var(--brand-600) 100%);
+}
+/* Right-hand end of the head: export, then the stacked meeting actions beside it.
+   align-items:center is what keeps export pinned to the stack's vertical middle as the
+   undo button expands and collapses underneath the reanalyze button. */
+.detail-head-actions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* stretch, not flex-end: a collapsed button still contributes its (wider) text to the
+   column's intrinsic width, so every button sits at that width and only the *height* ever
+   animates. Anything narrower would snap the panel sideways when one appears.
+   No `gap`: two buttons collapse independently here (naming, undo), and one shared gap
+   cannot express "space above whichever is currently open" — the spacing rides on the
+   expanded button's own margin-top instead. */
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  min-height: 31px;
+}
+
+/* The clip that makes the collapse work lives on the button itself, not on .detail-actions:
+   a parent overflow:hidden would also cut the gradient buttons' drop shadow. */
+.detail-actions .detail-action-collapsible {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition:
+    max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    border-width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.18s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.32s;
+}
+
+.detail-actions.has-speakers #detailNameSpeakersBtn,
+.detail-actions.has-edited #detailUndoEditBtn {
+  max-height: 40px;
+  margin-top: 8px;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  visibility: visible;
+  opacity: 1;
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+/* The scroller of the detail pane — everything from Döküm down. A plain block on purpose:
+   .detail-grid keeps its own layout untouched inside it, because a grid that is also the
+   scroll container gets a definite height from the flex row above and makes the cards clip
+   themselves rather than scroll. The padding gives the scrollbar its own lane and leaves
+   room for the cards' side shadows (overflow-y forces overflow-x to `auto`, which would
+   otherwise clip them); the matching negative margins pull it back into line with the head. */
+.detail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 10px 6px 6px;
+  margin: -6px -10px -6px -6px;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+
+.analysis-section-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+/* "Analiz bekliyor" on a list row, and the matching notice in the detail pane. Amber,
+   not red: the transcript was saved and nothing is broken — there is just one step left,
+   which reanalysis performs. Both live here so the two surfaces cannot drift apart. */
+.meeting-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.meeting-badge-pending {
+  color: #8a6420;
+  background: rgba(176, 138, 74, 0.14);
+  border: 1px solid rgba(176, 138, 74, 0.3);
+}
+.detail-no-analysis {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #8a6420;
+  background: rgba(176, 138, 74, 0.1);
+  border: 1px solid rgba(176, 138, 74, 0.28);
+}
+.detail-no-analysis i {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Döküm and Detaylı Analiz: the two full-width, undivided reads of the meeting. They share
+   one treatment so they read as a pair sitting above the nine section cards. */
+.detail-transcript-card,
+.detail-analysis-card {
+  border-top: 3px solid var(--brand-500);
+  overflow: hidden;
+}
+.detail-transcript-card .card-header,
+.detail-analysis-card .card-header {
+  background: linear-gradient(90deg, var(--surface-2), transparent);
+}
+.detail-transcript-card .card-header h6,
+.detail-analysis-card .card-header h6 {
+  color: var(--brand-800);
+}
+.detail-transcript-card .btn-outline-primary,
+.detail-analysis-card .btn-outline-primary {
+  color: var(--brand-600);
+  border-color: var(--neutral-300);
+}
+.detail-transcript-card .btn-outline-primary:hover,
+.detail-transcript-card .btn-outline-primary:focus-visible,
+.detail-analysis-card .btn-outline-primary:hover,
+.detail-analysis-card .btn-outline-primary:focus-visible {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand-400) 0%, var(--brand-600) 100%);
+}
+.analysis-section-card {
+  --section-accent: var(--brand-500);
+  --section-tint: rgba(77, 123, 161, 0.05);
+  background: var(--surface-0);
+  border-top: 3px solid var(--section-accent);
+  min-width: 0;
+  overflow: hidden;
+}
+.analysis-section-card .card-header {
+  background: linear-gradient(180deg, var(--section-tint), transparent);
+}
+.analysis-section-card .edit-btn {
+  color: var(--section-accent);
+}
+.analysis-section-card .btn-outline-primary {
+  color: var(--section-accent);
+  border-color: color-mix(in srgb, var(--section-accent) 58%, white);
+}
+.analysis-section-card .btn-outline-primary:hover,
+.analysis-section-card .btn-outline-primary:focus-visible {
+  color: #fff;
+  background-color: var(--section-accent);
+  border-color: var(--section-accent);
+}
+/* Nine section accents held at a common depth so they read as one family rather than a
+   rainbow: cool blues carry the neutral/informational sections, and the three warm hues
+   are spent only where the meaning is semantic (deferred = amber, risks = red,
+   decisions/next steps = green). */
+.analysis-section-card.theme-indigo {
+  --section-accent: #5a67ab;
+  --section-tint: rgba(90, 103, 171, 0.06);
+}
+.analysis-section-card.theme-blue {
+  --section-accent: #3d6485;
+  --section-tint: rgba(61, 100, 133, 0.06);
+}
+.analysis-section-card.theme-green {
+  --section-accent: #4a8d6d;
+  --section-tint: rgba(74, 141, 109, 0.06);
+}
+.analysis-section-card.theme-orange {
+  --section-accent: #b07d3f;
+  --section-tint: rgba(176, 125, 63, 0.065);
+}
+.analysis-section-card.theme-cyan {
+  --section-accent: #3d7f92;
+  --section-tint: rgba(61, 127, 146, 0.06);
+}
+.analysis-section-card.theme-violet {
+  --section-accent: #7a63a8;
+  --section-tint: rgba(122, 99, 168, 0.06);
+}
+.analysis-section-card.theme-red {
+  --section-accent: #a85454;
+  --section-tint: rgba(168, 84, 84, 0.06);
+}
+.analysis-section-card.theme-teal {
+  --section-accent: #43847d;
+  --section-tint: rgba(67, 132, 125, 0.06);
+}
+.analysis-section-card.theme-amber {
+  --section-accent: #9a7b3a;
+  --section-tint: rgba(154, 123, 58, 0.065);
+}
+
+@media (max-width: 1100px) {
+  .analysis-section-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .detail-head {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .analysis-section-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================== View-only card body (Döküm, Özet) ===================== */
+/* Replaces the old inline collapsible: the card body just shows a one-line meta summary
+   and a button; the real content only renders inside #viewerModal (dashboard-view.ts
+   openViewerModal), behind the same blurred backdrop as the edit modal. */
+
+.view-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.view-card-meta {
+  margin: 0;
+  color: var(--sneat-muted, #8592a3);
+  font-size: 13px;
+}
+
+/* ============ Shared transcript + analysis (Dashboard detail) ============ */
+
+.segment-list {
+  padding: 16px;
+  color: var(--sneat-heading);
+  font-size: 15px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.segment-list:empty::before {
+  content: 'Döküm yok.';
+  color: var(--sneat-muted);
+}
+.segment {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+/* pre-line, not pre: the turn-per-line breaks inserted by splitTranscriptTurns must show,
+   but the transcript's own runs of spaces should still collapse. */
+.segment .text {
+  white-space: pre-line;
+}
+.segment .speaker {
+  flex: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-500);
+  font-variant-numeric: tabular-nums;
+}
+/* Which capture side the voice came from (mic = the room, system audio = the call).
+   Quieter than the speaker label on purpose: it qualifies the speaker, it is not the
+   heading. */
+.source-badge {
+  flex: none;
+  align-self: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  letter-spacing: 0.02em;
+}
+.source-local {
+  color: #2f7d5a;
+}
+.source-remote {
+  color: #4a5ec4;
+}
+.source-mixed {
+  color: var(--sneat-muted);
+}
+
+/* Chunk-boundary repeats: kept visible for auditability but dimmed (excluded from the
+   analyzed text). */
+.segment.duplicate {
+  opacity: 0.4;
+}
+/* Crosstalk proxy: a segment shared by two or more speakers. */
+.segment.overlap {
+  border-left: 2px solid #c02c3c;
+  padding-left: 8px;
+  margin-left: -10px;
+}
+
+.analysis-section-table td {
+  color: var(--sneat-heading);
+  font-size: 15px;
+  line-height: 1.65;
+  padding: 12px 14px;
+}
+.analysis-section-table td p {
+  margin: 0;
+}
+.analysis-section-table td.analysis-section-empty {
+  color: var(--sneat-muted);
+  font-style: italic;
+}
+
+/* The whole analysis as one document (viewer modal, "Analizi Gör") — the section headings
+   come from serializeAnalysisMarkdown's `###`, so h3 is the only heading level here. */
+.analysis-full {
+  color: var(--sneat-heading);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.analysis-full h3 {
+  margin: 22px 0 8px;
+  color: var(--brand-800);
+  font-size: 15px;
+  font-weight: 600;
+}
+.analysis-full > :first-child {
+  margin-top: 0;
+}
+.analysis-full ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.analysis-full li {
+  margin-bottom: 4px;
+}
+.analysis-full p {
+  margin: 0 0 8px;
+}

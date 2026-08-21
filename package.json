@@ -1,0 +1,48 @@
+{
+  "name": "argus",
+  "version": "0.1.0",
+  "description": "Local-first Windows meeting assistant for transcription, speaker attribution, and structured AI notes.",
+  "author": "Baran Koc",
+  "private": true,
+  "main": "out/main/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "engine"
+  ],
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "dist": "npm run build && electron-builder --win --config electron-builder.config.cjs && npm run build-gpu-addon && npm run verify-dist",
+    "build-gpu-addon": "node utility/build-gpu-addon.cjs",
+    "verify-dist": "node utility/verify-package.ts",
+    "privacy-check": "node utility/privacy-check.cjs",
+    "privacy-check:history": "node utility/privacy-check.cjs --history",
+    "privacy-rewrite": "node utility/rewrite-git-history.cjs",
+    "test": "node --test \"utility/test/**/*.test.ts\" \"src/**/*.test.ts\"",
+    "start": "electron-vite preview"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@google/genai": "^2.16.0",
+    "@huggingface/transformers": "^3.3.0",
+    "audio-decode": "^2.2.2",
+    "bootstrap": "^5.3.8",
+    "boxicons": "^2.1.4",
+    "marked": "^16.2.1",
+    "ollama": "^0.6.3",
+    "openai": "^7.4.0"
+  },
+  "optionalDependencies": {
+    "electron-native-share": "file:vendor/electron-native-share"
+  },
+  "devDependencies": {
+    "7zip-bin": "^5.2.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
+  }
+}

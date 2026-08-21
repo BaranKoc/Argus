@@ -1,0 +1,554 @@
+/* The app shell: sidebar, collapse, topbar, tooltips, content panes, cards, buttons,
+   tables, drag handles and row actions. */
+/* ============================ Base ============================ */
+
+/* ============================ Dashboard shell ============================ */
+
+/* height, not min-height, plus overflow:hidden — the shell itself never scrolls. Scrolling
+   is pushed down to the pane that owns the content, so the sidebar, the topbar and the
+   detail head stay on screen instead of being carried off the top of the window with it.
+   Every ancestor of a scroller in here needs min-height:0: a flex item's default
+   min-height:auto refuses to shrink below its content, which silently hands the scrollbar
+   back to the document. */
+.dashboard-view {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+
+.sneat-sidebar {
+  width: var(--sneat-sidebar-w);
+  flex: none;
+  overflow-y: auto;
+  background:
+    radial-gradient(120% 40% at 0% 0%, rgba(115, 151, 183, 0.18) 0%, transparent 60%),
+    linear-gradient(180deg, var(--brand-800) 0%, var(--brand-900) 58%, #16242f 100%);
+  border-right: 1px solid rgba(169, 193, 214, 0.12);
+  box-shadow: var(--shadow-lg);
+  padding: 18px 14px;
+  transition: margin-left 0.2s ease;
+}
+/* Collapse: slide the sidebar out (single class toggle from main.ts). */
+.dashboard-view.sidebar-collapsed .sneat-sidebar {
+  margin-left: calc(-1 * var(--sneat-sidebar-w));
+}
+
+/* Sidebar header: brand lockup on the left, the collapse « pinned top-right. The rule
+   owns the padding/divider the brand block used to carry, so the divider spans both. */
+.sidebar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px 20px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(169, 193, 214, 0.14);
+}
+
+/* Text-only brand lockup. Keeping the identity in CSS avoids a branded binary asset and
+   lets the sidebar scale without raster artefacts. */
+.app-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sidebar-collapse-btn {
+  flex: none;
+  /* Pulled out of the header's padding box so it sits near the panel's own top-right
+     corner instead of being inset twice (aside padding + header padding). */
+  margin: -10px -8px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(169, 193, 214, 0.1);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-collapse-btn:hover {
+  background: rgba(169, 193, 214, 0.22);
+  color: #fff;
+}
+/* While the panel is open its own « is the only collapse control, so the topbar's reopen
+   button doesn't exist yet — that's what makes the topbar read like Notion's. */
+.dashboard-view:not(.sidebar-collapsed) .sidebar-open-btn {
+  display: none;
+}
+.app-brand-word {
+  color: #f3f8fc;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  user-select: none;
+}
+.app-brand-name {
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(210, 223, 234, 0.62);
+  user-select: none;
+}
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Explicit native chrome reset keeps menu links visually consistent across elements. */
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  appearance: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  text-align: left;
+  text-decoration: none;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  /* box-shadow is in the list because .menu-item.active paints its left rail with one:
+     without it the rail would snap between items while everything else eases. */
+  transition: background 0.15s, color 0.15s, box-shadow 0.2s ease;
+}
+.menu-link .bx {
+  font-size: 20px;
+}
+.menu-link:hover {
+  color: #fff;
+  background: rgba(169, 193, 214, 0.1);
+}
+.menu-item.active .menu-link {
+  background: linear-gradient(90deg, rgba(115, 151, 183, 0.34), rgba(115, 151, 183, 0.05));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--brand-400);
+}
+
+.sneat-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, var(--surface-1) 0%, var(--surface-2) 100%);
+}
+
+.sneat-topbar {
+  height: 62px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 24px;
+  background: rgba(253, 253, 252, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--sneat-border);
+  box-shadow: var(--shadow-sm);
+}
+.topbar-icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--sneat-text);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.topbar-icon-btn:hover {
+  color: var(--brand-600);
+  background: var(--surface-3);
+}
+
+/* Themed hover tooltip (replaces the unstyled native title bubble): a small dark
+   card matching the app's heading color, driven by data-tooltip so main.ts can
+   flip the text on toggle. */
+.has-tooltip {
+  position: relative;
+}
+.has-tooltip::after {
+  content: attr(data-tooltip);
+  box-shadow: var(--shadow-md);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  /* Bootstrap's dropdown caret is also an ::after, so on an export button the two rules
+     land on the same pseudo-element: its borders and margin have to be zeroed here or
+     they'd frame the bubble. */
+  margin: 0;
+  border: 0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--sneat-heading);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+.has-tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+/* For a trigger sitting at its container's right edge, the centered default spills past
+   that edge — and gets cut off by any overflow:hidden ancestor. This pins the bubble's
+   right side to the button's instead. */
+.has-tooltip.tooltip-end::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.topbar-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--sneat-heading);
+}
+
+.sneat-content {
+  padding: 24px;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Each pane fills the content area and decides for itself what scrolls inside it. List and
+   Settings scroll whole; Detail keeps its head fixed and scrolls only below it. */
+#listPane,
+#settingsPane {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+#detailPane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card polish (Sneat's softer shadow + radius over Bootstrap's default). */
+/* Bootstrap hard-codes pure #fff on .card and .table; both are re-pointed at the warm
+   surface so no panel on this page reverts to a cold white. */
+.card {
+  --bs-card-bg: var(--surface-0);
+  background-color: var(--surface-0);
+  border: 1px solid var(--sneat-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--sneat-text);
+}
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--sneat-border);
+  padding: 18px 20px;
+}
+.card-header h5,
+.card-header h6 {
+  color: var(--sneat-heading);
+}
+/* Shared button motion. Kept on one rule so every action in the dashboard reacts with the
+   same weight: a small lift + deeper shadow on hover, and a real press that settles back
+   *below* the resting position so the click is felt, not just seen.
+   Settings is a pane of this shell, so it inherits all of it from the one scope. */
+.dashboard-view .btn {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.14s ease,
+    background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+.dashboard-view .btn:hover {
+  transform: translateY(-1px);
+}
+.dashboard-view .btn:active {
+  transform: translateY(1px) scale(0.985);
+  transition-duration: 0.06s;
+}
+.dashboard-view .btn:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+/* Icon buttons ride on the same curve but only scale — a lift would make them drift out
+   of the row/header baseline they're aligned to. */
+.dashboard-view .icon-btn,
+.edit-modal .icon-btn {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), background 0.15s ease,
+    color 0.15s ease;
+}
+.dashboard-view .icon-btn:hover:not(:disabled),
+.edit-modal .icon-btn:hover:not(:disabled) {
+  transform: scale(1.12);
+}
+.dashboard-view .icon-btn:active:not(:disabled),
+.edit-modal .icon-btn:active:not(:disabled) {
+  transform: scale(0.92);
+  transition-duration: 0.06s;
+}
+
+/* "Görüntüle" / "Listeye Dön": the two navigation actions get a sweep — a soft highlight
+   that wipes across on hover — so the primary path through the app feels distinct from
+   the secondary buttons sitting next to it. */
+.meeting-row .btn[data-action='open'],
+.detail-head #backToList,
+.view-card-body .btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.meeting-row .btn[data-action='open']::after,
+.detail-head #backToList::after,
+.view-card-body .btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.45) 50%, transparent 80%);
+  transform: translateX(-120%);
+  transition: transform 0.55s ease;
+}
+.meeting-row .btn[data-action='open']:hover::after,
+.detail-head #backToList:hover::after,
+.view-card-body .btn:hover::after {
+  transform: translateX(120%);
+}
+
+/* Card edit pencils: muted by default, tinted on hover like the sidebar toggle, and they
+   rotate into the "nib down" angle so the affordance reads as writing. */
+/* Scoped with .dashboard-view to outrank the generic `.dashboard-view .btn:hover` lift
+   above — .edit-btn alone loses to it and the rotation never applies. */
+.dashboard-view .edit-btn {
+  color: var(--sneat-text);
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background 0.15s ease,
+    color 0.15s ease;
+}
+.dashboard-view .edit-btn:hover {
+  background: var(--surface-3);
+  color: var(--section-accent, var(--brand-600));
+  transform: rotate(-12deg) scale(1.1);
+}
+.dashboard-view .edit-btn:active {
+  transform: rotate(-12deg) scale(0.94);
+  transition-duration: 0.06s;
+}
+
+.table > :not(caption) > * > * {
+  padding: 14px 20px;
+}
+.meeting-name {
+  font-weight: 500;
+  color: var(--sneat-heading);
+  cursor: pointer;
+}
+.meeting-row {
+  cursor: pointer;
+}
+.meeting-row:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: -2px;
+}
+/* Held row: an unmistakable tint + lift so it reads as "picked up" and its highlight
+   visibly follows to whatever slot it's dragged into. --bs-table-bg-state: transparent
+   disables Bootstrap's cell-level hover box-shadow so it doesn't fight this tint. */
+.meeting-row.dragging > * {
+  --bs-table-bg-state: transparent;
+}
+.meeting-row.dragging {
+  background: var(--surface-3);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  z-index: 2;
+}
+
+/* While reordering, kill Bootstrap's per-row :hover grey (.table-hover) so the only
+   highlight during a drag is the held row above — otherwise the row the cursor happens to
+   pass over lights up instead of the row actually being dragged. */
+.reordering .meeting-row:hover > * {
+  --bs-table-bg-state: transparent;
+}
+/* .drag-handle:hover below is a separate rule from the table hover tint above, so it needs
+   its own suppression — otherwise a handle the cursor merely passed over during the drag
+   stays lit even though it isn't the row actually being dragged. */
+.reordering .drag-handle:hover {
+  background: transparent;
+  color: var(--neutral-400);
+}
+
+/* The list table doesn't need horizontal scrolling (4 fixed columns), and Bootstrap's
+   .table-responsive overflow-x: auto implicitly computes overflow-y as auto too — which
+   clips the export dropdown-menu (it stays in-flow in the DOM, Popper only repositions it)
+   instead of letting it float above the table. */
+.table-responsive {
+  overflow: visible;
+}
+
+/* Drag-to-reorder handle column: narrow, muted grip that highlights like the other
+   icon buttons and switches to a grab cursor on hover. */
+.drag-cell {
+  width: 44px;
+  text-align: center;
+}
+.drag-handle {
+  border: none;
+  background: transparent;
+  color: var(--neutral-400);
+  cursor: grab;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.drag-handle:hover {
+  background: var(--surface-3);
+  color: var(--brand-600);
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+.meeting-name-input {
+  width: min(280px, 60vw);
+}
+
+/* Row actions: square icon buttons, right-aligned, in a fixed reading order
+   (Dışa Aktar · Yeniden İsimlendir · Sil) with the destructive one last. Labels are
+   carried by the themed tooltip instead of button text — three labelled buttons per row
+   crowded the name column on narrow windows. */
+.meeting-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+.meeting-actions > * {
+  vertical-align: middle;
+}
+.meeting-actions > * + * {
+  margin-left: 6px;
+}
+.btn-icon-only {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  line-height: 1;
+}
+.btn-icon-only .bx {
+  font-size: 17px;
+}
+/* Bootstrap's caret is a text-flow ::after; on a square icon button it pushes the glyph
+   off-centre, and the dropdown still works without it (the JS binds to data-bs-toggle).
+   Excluding .has-tooltip is what makes the export buttons' tooltips appear at all: they
+   claim the same ::after, and this rule used to hide it — caret and bubble alike. Their
+   caret is already gone, since .has-tooltip::after overwrites its content. */
+.btn-icon-only.dropdown-toggle:not(.has-tooltip)::after {
+  display: none;
+}
+/* The tooltip is positioned relative to the button, so the button must not clip it —
+   .btn-group establishes its own stacking context around the export control. */
+.meeting-actions .btn-group,
+.detail-head .btn-group {
+  overflow: visible;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--neutral-400);
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 16px;
+  vertical-align: middle;
+}
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* Rename control: an outline icon-button so it reads as an action like the row's
+   Görüntüle/Dışa Aktar/Sil buttons (which are Bootstrap btn-outline-*), fill on hover
+   instead of the flat pencil it used to be. Amber is the palette's single warm accent —
+   it marks "edit in place" as distinct from the blue navigate/export actions. */
+.rename-btn {
+  margin-left: 8px;
+  color: #8a6a2e;
+  border: 1px solid #ddc9a3;
+  background: #faf6ee;
+  line-height: 1;
+}
+.rename-btn:hover,
+.rename-btn:focus-visible {
+  color: #fff;
+  background-color: #9a7b3a;
+  border-color: #9a7b3a;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--sneat-muted);
+  font-size: 15px;
+}
+
+/* ===================== Soft "label" badges (Sneat) ===================== */
+/* Tinted background + saturated text — the muted badge style UI_01 names for the
+   per-state list vocabulary. */
+.badge.bg-label-primary {
+  background: var(--brand-100);
+  color: var(--brand-600);
+}
+.badge.bg-label-secondary {
+  background: var(--neutral-100);
+  color: var(--neutral-600);
+}
+.badge.bg-label-success {
+  background: #dff7e9;
+  color: #1eaf6d;
+}
+.badge.bg-label-danger {
+  background: #ffe0e1;
+  color: #ff3e1d;
+}
+.badge.bg-label-warning {
+  background: #fff2d6;
+  color: #ffab00;
+}
+.badge.bg-label-info {
+  background: #d9f0fb;
+  color: #03c3ec;
+}
+.badge.bg-label-dark {
+  background: #dcdfe1;
+  color: #4b4b4b;
+}
+
+.sneat-sidebar { display: flex; flex-direction: column; }
+.sneat-sidebar .menu { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }

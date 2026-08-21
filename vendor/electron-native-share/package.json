@@ -1,0 +1,50 @@
+{
+  "name": "electron-native-share",
+  "version": "0.1.1-sozden.1",
+  "description": "Fork of electron-native-share 0.1.1 with the Windows share fixed — see NOTES.md",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib/",
+    "src/darwin/",
+    "src/win32/",
+    "binding.gyp",
+    "prebuilds/",
+    "NOTES.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:native": "node-gyp rebuild",
+    "install": "node-gyp-build || exit 0"
+  },
+  "author": "Pedro Primor <pedro.primor@pm.me> (https://github.com/pprimor)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pprimor/electron-native-share.git"
+  },
+  "type": "commonjs",
+  "os": ["win32"],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "node-addon-api": "^8.3.0",
+    "node-gyp-build": "^4.8.4"
+  },
+  "peerDependencies": {
+    "electron": ">=20.0.0"
+  },
+  "peerDependenciesMeta": {
+    "electron": {
+      "optional": true
+    }
+  }
+}

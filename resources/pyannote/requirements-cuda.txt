@@ -1,0 +1,11 @@
+# CUDA build of the same torch/torchaudio versions requirements.txt resolves to from
+# PyPI, so switching device never also switches library version. Installed BEFORE
+# requirements.txt: pip then sees torch as already satisfied and pyannote.audio cannot
+# pull the CPU wheel back over it. --index-url (not --extra-index-url) on purpose —
+# with both indexes in play pip can silently prefer the PyPI CPU wheel.
+#
+# cu126 rather than a newer toolkit: cu128 stops at torch 2.11, and cu130 is CUDA 13,
+# which needs a 580+ driver. Developer-only; the shipped runtime stays CPU.
+--index-url https://download.pytorch.org/whl/cu126
+torch==2.13.0+cu126
+torchaudio==2.11.0+cu126

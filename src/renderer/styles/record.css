@@ -1,0 +1,466 @@
+/* Record focus panel: full-screen, sidebar-less, state-driven background. The nav-icon
+   block at the end sat after the modal section in the old flat file. */
+/* ============================ RECORD (focus) ============================ */
+
+/* The focus panel is the app's "brand moment", so it runs on the deep end of the same
+   blue ramp the dashboard uses. Two reasons it's dark rather than the old pastel wash:
+   the Argus wordmark is intentionally text-only and reads best on a dark surface, and a
+   single dark canvas lets each live state be signalled by an *accent* (--state-accent)
+   instead of by a wholly different background hue — so the states stay distinguishable
+   without the screen changing identity six times per session. */
+
+/* --state-accent is the ONE state token: the orb, the background wash, the glow and the
+   button tints are all color-mix()es of it, which is what keeps the canvas and the orb
+   locked to the same hue at every moment of a transition instead of drifting apart.
+   It must be @property-registered — a plain custom property is not interpolable, so
+   every state change would snap; registered, the gradients built from it re-resolve each
+   frame and the whole screen cross-fades. */
+@property --state-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #6d93b8;
+}
+
+.record-view {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* The brand lockup, the choices and the control bar are all absolutely positioned, so
+     justify-content:center used to center the orb on the whole viewport — which put it
+     visibly below the center of the gap those three leave behind. These two reserve that
+     chrome as padding, so "centered" means centered in the space the user actually sees
+     as empty. Both are only as accurate as the chrome's own metrics: top is the lockup's
+     54px offset plus its ~61px height, bottom is the choices' 124px offset plus its ~67px
+     height (the control bar below it is shorter than that and never decides the number). */
+  --top-chrome: 140px;
+  --bottom-chrome: 130px;
+  padding: var(--top-chrome) 40px var(--bottom-chrome);
+  --state-accent: #6d93b8;
+  /* Mix ratios rise toward the center, so the accent is strongest right behind the orb
+     and fades to the near-black base at the edges. */
+  background:
+    radial-gradient(
+      95% 78% at 50% 34%,
+      color-mix(in srgb, var(--state-accent) 46%, #16232f) 0%,
+      color-mix(in srgb, var(--state-accent) 20%, #121d28) 46%,
+      transparent 72%
+    ),
+    radial-gradient(70% 62% at 84% 96%, color-mix(in srgb, var(--state-accent) 22%, #0f1922) 0%, transparent 62%),
+    linear-gradient(168deg, color-mix(in srgb, var(--state-accent) 13%, #16222e) 0%, #0e1720 100%);
+  transition: --state-accent 0.9s ease;
+  overflow: hidden;
+}
+
+/* Natural, desaturated state accents held at a common lightness/chroma so no state
+   "shouts" louder than the others — the hue alone carries the meaning. */
+.record-view.state-idle {
+  --state-accent: #6d93b8;
+}
+.record-view.state-recording {
+  --state-accent: #b8564f;
+}
+.record-view.state-paused {
+  --state-accent: #c08f4e;
+}
+.record-view.state-transcribing {
+  --state-accent: #4f8fa8;
+}
+.record-view.state-analyzing {
+  --state-accent: #7b7bb0;
+}
+.record-view.state-done {
+  --state-accent: #55997a;
+}
+.record-view.state-error {
+  --state-accent: #a85963;
+}
+
+/* The meeting was saved, but without its analysis. Amber rather than the done green:
+   the run finished and the transcript is safe, so this is not the error red — but
+   something is still waiting for the user, which the success green would deny. Sits at
+   the same lightness/chroma as every other accent, and only ever pairs with
+   .state-done, so no other state's meaning can be overwritten. */
+.record-view.state-done.analysis-failed {
+  --state-accent: #b08a4a;
+}
+
+/* The meeting language tints the RESTING canvas, and only the resting canvas. The
+   selector is visible exactly in idle/error, so this is the one moment the choice is
+   still live and the tint tells the user which mode they are about to record in without
+   reading a label. Once recording starts the live-state accents take over: those carry
+   meaning (recording / paused / done) that a language tint must not overwrite.
+
+   Only foreign is overridden. Turkish is the ordinary case, so it keeps the app's
+   normal resting blue from .state-idle above — writing it out again would just be a
+   second copy to keep in sync. The purple sits at the same lightness/chroma as every
+   other accent so it does not shout, and is pushed toward magenta to stay apart from
+   state-analyzing's periwinkle.
+
+   Higher specificity than the plain .state-idle rule, so it wins regardless of source
+   order; --state-accent is @property-registered, so switching language cross-fades the
+   whole canvas instead of snapping. */
+.record-view.state-idle.lang-foreign {
+  --state-accent: #9a7ab8;
+}
+
+/* Brand lockup: wordmark with the product name locked beneath it, sharing the logo's
+   optical width via letter-spacing rather than a matching font size. */
+.record-brand {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.record-nav-actions {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.record-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border: 1px solid rgba(210, 223, 234, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(226, 234, 240, 0.86);
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.record-nav:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(210, 223, 234, 0.42);
+  color: #fff;
+}
+
+.record-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+  text-align: center;
+}
+
+/* A soft glowing orb, calm by default and pulsing while recording — the visual heartbeat
+   of the focus mode. Its tint follows --state-accent. */
+.record-orb {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.18) 44%, transparent 66%),
+    radial-gradient(
+      circle at 50% 52%,
+      color-mix(in srgb, var(--state-accent) 92%, white) 0%,
+      color-mix(in srgb, var(--state-accent) 70%, #101b25) 74%
+    );
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    0 20px 70px -14px color-mix(in srgb, var(--state-accent) 70%, transparent);
+}
+/* The pulse ring is a pseudo-element rather than an animated box-shadow: box-shadow
+   can't read the live --state-accent mid-keyframe without re-declaring it per frame,
+   and a scaling ring composites on the GPU instead of repainting the orb. */
+.record-orb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--state-accent) 75%, transparent);
+  opacity: 0;
+}
+.state-recording .record-orb::after {
+  animation: orb-ring 1.9s ease-out infinite;
+}
+.state-transcribing .record-orb,
+.state-analyzing .record-orb {
+  animation: orb-breathe 2.4s ease-in-out infinite;
+}
+@keyframes orb-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+@keyframes orb-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+.record-text {
+  margin: 0;
+  /* Status copy, not content: a text cursor and a drag-selection over it are noise, and
+     the selection is what lets the whole lockup be dragged as a ghost image. */
+  user-select: none;
+  font-size: 30px;
+  font-weight: 500;
+  color: #eef3f7;
+  max-width: 640px;
+  line-height: 1.35;
+  text-shadow: 0 2px 20px rgba(10, 20, 30, 0.5);
+}
+
+.record-kvkk {
+  margin: 0;
+  max-width: 460px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #c2ddd0;
+  background: rgba(85, 153, 122, 0.12);
+  border: 1px solid rgba(85, 153, 122, 0.28);
+  padding: 9px 15px;
+  border-radius: 10px;
+}
+
+/* The pre-meeting choices — language and meeting type — chosen before recording starts.
+   Segmented pills rather than <select>s, matching the app's other choice surfaces
+   (settings.css explains why: each option can carry the line that actually decides it).
+   Styled from .rc-btn's dark palette rather than the settings card classes, which are
+   built on the light dashboard tokens and would be invisible on this canvas.
+
+   Named .record-choice* rather than .record-language*: the block held one choice when it
+   was written and the old name became a lie the moment it held two.
+
+   Anchored just above the control bar (which sits at bottom:44px and stands ~65px
+   tall) so it reads as the last step before pressing start. Anchoring from the bottom
+   also means the conditional hints grow the block upward rather than pushing the
+   buttons around. */
+.record-choices {
+  position: absolute;
+  bottom: 124px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+
+/* record-view.ts shows this block in idle/error only, so it is the taller bottom chrome
+   for exactly those two states — anywhere else the control bar alone is what the centered
+   orb has to clear. Declared here rather than up top so the number sits next to the
+   offsets it is derived from. */
+.record-view.state-idle,
+.record-view.state-error {
+  --bottom-chrome: 205px;
+}
+
+/* The two groups on one row of their own. Kept as a row element rather than laying the
+   groups out directly in .record-choices, so anything added to the block later stacks
+   above them instead of joining their line and pushing the pills sideways. */
+/* Two equal halves, NOT a centered row. The groups are different widths ("Toplantı türü"
+   carries the longer option names), so centering the row as one block pushes the seam
+   between them off the screen's center line and the pair reads as lopsided. Equal fr
+   tracks pin that seam to the center instead and split the gap evenly around it, so each
+   group hugs the middle from its own side. */
+.record-choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  gap: 22px;
+}
+.record-choice-row > :first-child {
+  justify-self: end;
+}
+.record-choice-row > :last-child {
+  justify-self: start;
+}
+.record-choice-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.record-choice-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #9fb4c2;
+}
+
+.record-choice-options {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--state-accent) 22%, transparent);
+  background: color-mix(in srgb, var(--state-accent) 10%, rgba(13, 22, 30, 0.55));
+  backdrop-filter: blur(10px);
+}
+
+.record-choice-option {
+  padding: 8px 20px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: #b9cbd8;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.record-choice-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e6edf3;
+}
+/* The selected option follows --state-accent, unlike the start/stop buttons: this is a
+   setting rather than a fixed-meaning action, so it belongs to the current state's hue. */
+.record-choice-option.selected {
+  background: color-mix(in srgb, var(--state-accent) 30%, rgba(255, 255, 255, 0.1));
+  border-color: color-mix(in srgb, var(--state-accent) 45%, transparent);
+  color: #fff;
+}
+
+/* Floating, centered control bar at the bottom. */
+.record-controls {
+  position: absolute;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--state-accent) 26%, transparent);
+  background: color-mix(in srgb, var(--state-accent) 14%, rgba(13, 22, 30, 0.72));
+  box-shadow: 0 18px 50px -12px rgba(6, 12, 18, 0.75);
+  backdrop-filter: blur(14px);
+}
+
+.rc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 1px solid rgba(210, 223, 234, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e6edf3;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s, border-color 0.12s;
+}
+.rc-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(210, 223, 234, 0.36);
+}
+.rc-btn .bx {
+  font-size: 20px;
+}
+/* The three semantic buttons keep fixed hues — they mean start/stop/done regardless of
+   the current state, so tying them to --state-accent would erase that meaning. */
+.rc-primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #5f8fb5 0%, #3d6485 100%);
+  color: #fff;
+  box-shadow: 0 10px 26px -8px rgba(95, 143, 181, 0.6);
+}
+.rc-primary:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, #74a2c6 0%, #47728f 100%);
+  box-shadow: 0 14px 30px -8px rgba(95, 143, 181, 0.7);
+}
+/* Start is the one exception to the fixed hues above. While idle, the language choice has
+   already turned the canvas and the pills purple, so a blue start button in the middle of
+   them reads as left over from another screen. Scoped to state-idle: the moment recording
+   begins this button is off screen and the live-state accents own the canvas, so the rule
+   above still holds everywhere it carries meaning. Derived from --state-accent at the same
+   two stops the blue is built on, so the button tracks the language tint instead of
+   hard-coding a second purple that would drift. */
+.record-view.state-idle.lang-foreign .rc-primary {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--state-accent) 92%, #101b25) 0%,
+    color-mix(in srgb, var(--state-accent) 60%, #101b25) 100%
+  );
+  box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--state-accent) 60%, transparent);
+}
+.record-view.state-idle.lang-foreign .rc-primary:hover {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--state-accent) 82%, white) 0%,
+    color-mix(in srgb, var(--state-accent) 72%, #101b25) 100%
+  );
+  box-shadow: 0 14px 30px -8px color-mix(in srgb, var(--state-accent) 70%, transparent);
+}
+.rc-danger {
+  color: #e8b3ad;
+  border-color: rgba(184, 86, 79, 0.45);
+  background: rgba(184, 86, 79, 0.14);
+}
+.rc-danger:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, #b8564f 0%, #90403c 100%);
+  color: #fff;
+}
+.rc-success {
+  border-color: transparent;
+  background: linear-gradient(135deg, #55997a 0%, #3d7359 100%);
+  color: #fff;
+  box-shadow: 0 10px 26px -8px rgba(85, 153, 122, 0.6);
+}
+.rc-success:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, #66ab8a 0%, #478365 100%);
+}
+
+/* Short viewports: the absolute brand lockup would collide with the centered orb, so
+   fold it back into the flow above the center block. */
+@media (max-height: 720px) {
+  .record-brand {
+    position: static;
+    transform: none;
+    margin-bottom: 26px;
+  }
+  /* The lockup is in the flow now, so it takes its own space — reserving it a second time
+     as padding would push the whole block off the bottom of an already short viewport. */
+  .record-view {
+    --top-chrome: 24px;
+  }
+  .record-brand .brand-lockup-word {
+    font-size: 27px;
+  }
+}
+
+.record-nav-icon {
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 18px;
+}
+
+/* Settings is a pane of the shell (#settingsPane), so surface and outer spacing come from
+   .sneat-content — only the two-column split is Settings' own. The max-width keeps a
+   single settings card from stretching across a wide window. */

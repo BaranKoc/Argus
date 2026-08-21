@@ -1,0 +1,32 @@
+{
+  "name": "argus-engine",
+  "version": "0.1.0",
+  "description": "In-process speech-to-text + analysis engine (Transformers.js / ONNX). Replaces the Python/WhisperX engine.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test-run": "chcp 65001>nul & node --env-file-if-exists=.env test/manual-run.ts",
+    "download-models": "node download/download-models.ts",
+    "download-pyannote": "chcp 65001>nul & node download/download-pyannote.ts",
+    "build-pyannote-runtime": "chcp 65001>nul & node download/build-pyannote-runtime.ts",
+    "check-models": "node --env-file-if-exists=.env download/check-models.ts",
+    "bench": "node --env-file-if-exists=.env bench/run.ts",
+    "diarize-bench": "chcp 65001>nul & node --env-file-if-exists=.env bench/diarize-bench.ts",
+    "promote": "node --env-file-if-exists=.env bench/promote.ts",
+    "prune-test-run": "node --env-file-if-exists=.env bench/prune-test-run.ts",
+    "report": "node --env-file-if-exists=.env bench/report.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@google/genai": "^2.16.0",
+    "@huggingface/transformers": "^3.3.0",
+    "audio-decode": "^2.2.2",
+    "ffmpeg-static": "^5.2.0",
+    "ollama": "^0.6.3",
+    "openai": "^7.4.0"
+  }
+}

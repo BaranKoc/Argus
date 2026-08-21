@@ -1,0 +1,47 @@
+/test_media
+/output
+/temp
+/meeting_recordings
+.env
+
+# Repository privacy guard. Synthetic/public media may still be force-added after review.
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.flac
+*.ogg
+*.opus
+*.wma
+*.mp4
+*.mov
+*.webm
+*.mkv
+
+# Real meeting references stay local. Public examples must be synthetic and explicitly
+# force-added after review.
+/control-group/**/*.json
+/docs/*.local.md
+
+
+# Node engine
+/models
+node_modules/
+
+# Electron app build output
+/out
+/dist
+
+# Provisioned by build-pyannote-runtime; ~4.6 GB of relocatable CPython + CUDA torch.
+# This becomes the separate GPU support archive.
+/build/pyannote-runtime-cuda
+# Its --cpu twin (~1.2 GB). Developer measurement only; never packaged.
+/build/pyannote-runtime-cpu
+
+# node-gyp intermediates for the vendored native addon. The shipped artifact is the
+# committed prebuilds/ binary, not this.
+/vendor/electron-native-share/build
+
+# Python bytecode from the bundled Pyannote worker
+__pycache__/
+*.pyc

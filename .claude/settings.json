@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Read .claude/agents/git-history-privacy-auditor.md completely and follow it. Run its deterministic checks against the repository. Return ok=false when either check fails so the main agent must continue; never include matched sensitive values in the reason. $ARGUMENTS",
+            "timeout": 180
+          }
+        ]
+      }
+    ]
+  }
+}

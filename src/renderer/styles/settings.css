@@ -1,0 +1,225 @@
+/* Settings nav rail, speaker-separation setup guide and Analiz Modeli preset cards. */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+  max-width: 980px;
+}
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: start;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--surface-0);
+  box-shadow: var(--shadow-md);
+}
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--sneat-text);
+  text-align: left;
+}
+.settings-nav-item:hover { background: var(--surface-2); color: var(--brand-600); }
+/* Same inset left rail as .menu-item.active in the sidebar — the two nav lists are the
+   same component in different surfaces, and the rail is what says so. */
+.settings-nav-item.active {
+  background: var(--brand-100);
+  color: var(--brand-600);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--brand-400);
+}
+/* Optional one-column layout for settings surfaces without a navigation rail. */
+.settings-layout.single { grid-template-columns: minmax(0, 1fr); }
+.settings-card { min-width: 0; }
+.settings-status.ready { color: #1eaf6d; }
+.settings-status.warning, .settings-message { color: #d05d00; }
+
+/* A feature this installer does not carry. Fading the whole section — not just the two
+   disabled inputs — is what makes "unavailable" legible at a glance instead of looking
+   like controls that failed to load. The status line, its explanatory hint and the guide
+   stay at full strength: the guide holds the two buttons that MAKE the feature available,
+   so fading it would grey out the one thing left to click. Same opacity as the
+   fieldset:disabled precedent in shell.css. */
+.is-unavailable > *:not(.settings-status):not(#diarizationHint):not(#diarizationGuide) {
+  opacity: 0.68;
+}
+
+/* Section heading with a state tag beside it, for a setting that ships before it is fully
+   ready. The tag carries the same amber as .settings-status.warning, so "caution" reads the
+   same everywhere in this pane. */
+.settings-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.settings-section-head h6 {
+  margin: 0;
+}
+.settings-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(208, 93, 0, 0.12);
+  color: #d05d00;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+/* Amber says "be careful"; this one says "here is what it needs". The base badge is also
+   worn by the Analiz Modeli preset cards, so the calm tone is a modifier rather than a
+   change to it. */
+.settings-badge-info {
+  background: var(--brand-100);
+  color: var(--brand-600);
+}
+
+/* Speaker separation's setup guide. It replaced an amber caution box: nothing here is a
+   warning any more — the feature works, it just has two prerequisites — so it carries the
+   brand tone and an info icon, and the two buttons that satisfy those prerequisites live
+   inside it, next to the steps that explain them. Left rail + icon still match the
+   .detail-head / .pdf-modal-notice pattern used elsewhere. */
+.settings-guide {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--brand-200);
+  border-left: 3px solid var(--brand-500);
+  border-radius: 10px;
+  background: var(--brand-50);
+}
+.settings-guide > .bx {
+  flex: none;
+  font-size: 19px;
+  line-height: 1.35;
+  color: var(--brand-600);
+}
+.settings-guide-title {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--sneat-heading);
+}
+.settings-guide-lead {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--sneat-text);
+}
+/* Numbered because the order is real: the driver has to be current before the add-on can
+   find a card, and the switch does nothing until both are done. counter/::before rather
+   than a plain list-style, so the number gets the brand colour without a marker pseudo. */
+.settings-guide-steps {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: guide-step;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--sneat-text);
+}
+.settings-guide-steps > li {
+  position: relative;
+  padding-left: 24px;
+  counter-increment: guide-step;
+}
+.settings-guide-steps > li::before {
+  content: counter(guide-step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  background: var(--brand-500);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+.settings-guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.settings-guide-list {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--sneat-text);
+}
+.settings-guide-steps strong,
+.settings-guide-list strong {
+  font-weight: 600;
+  color: var(--sneat-heading);
+}
+/* Analiz Modeli: provider choice as a card grid rather than a <select>, so each option can
+   carry the one line that actually decides it ("bilgisayardan çıkmaz" vs "sunucuya gönderilir")
+   instead of hiding that behind a name. auto-fit keeps it 1-3 columns without a breakpoint. */
+.llm-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+.llm-preset-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--sneat-border, rgba(67, 89, 113, 0.16));
+  border-radius: 10px;
+  background: var(--surface-0);
+  text-align: left;
+}
+.llm-preset-card:hover { border-color: var(--brand-400); background: var(--surface-2); }
+/* Same brand pair as .settings-nav-item.active — selection reads identically everywhere
+   in this pane. The ring rather than a thicker border keeps the grid from reflowing. */
+.llm-preset-card.selected {
+  border-color: var(--brand-400);
+  background: var(--brand-100);
+  box-shadow: 0 0 0 1px var(--brand-400);
+}
+.llm-preset-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.llm-preset-head > .bx { font-size: 18px; color: var(--brand-500); }
+.llm-preset-label { font-weight: 600; color: var(--sneat-heading); }
+.llm-preset-hint { font-size: 12px; line-height: 1.5; color: var(--sneat-text); }
+
+.llm-fields { display: grid; gap: 14px; max-width: 460px; }
+.llm-field .form-label { margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+.llm-field-hint { margin: 5px 0 0; font-size: 12px; color: var(--sneat-text); }
+.llm-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.llm-blocker { font-size: 12.5px; color: #d05d00; }
+.llm-divider { margin: 20px 0 16px; opacity: 0.5; }
+
+@media (max-width: 700px) {
+  .settings-layout { grid-template-columns: 1fr; }
+  .settings-nav { flex-direction: row; }
+  .settings-nav-item { justify-content: center; }
+}

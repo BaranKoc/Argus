@@ -1,0 +1,44 @@
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+
+.brand-lockup-word {
+  color: #f3f8fc;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-shadow: 0 5px 22px rgba(8, 16, 24, 0.6);
+  user-select: none;
+}
+
+.brand-lockup-name {
+  margin: 0;
+  color: rgba(223, 232, 239, 0.72);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.brand-lockup-name::before,
+.brand-lockup-name::after {
+  content: '';
+  display: inline-block;
+  width: 26px;
+  height: 1px;
+  margin-right: 14px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, transparent, rgba(180, 200, 216, 0.55));
+}
+
+.brand-lockup-name::after {
+  margin: 0 0 0 14px;
+  background: linear-gradient(90deg, rgba(180, 200, 216, 0.55), transparent);
+}
